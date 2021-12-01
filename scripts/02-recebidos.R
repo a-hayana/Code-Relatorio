@@ -1,0 +1,290 @@
+
+# Recebidos ---------------------------------------------------------------
+
+# Carregando pacotes
+library(readxl)
+library(dplyr)
+
+# --------- Leitura dos dados históricos
+dados_historico <- read_excel("dados/relatorio_historico.xlsx", 
+                                 sheet = "recebidos")
+  
+
+# --------- Leitura dos dados de 2021
+recebidos2021 <- read_excel("dados/dados2021.xlsx", 
+                           sheet = "RECEBIDOS")
+
+# Limpeza das variáveis
+recebidos2021 <- janitor::clean_names(recebidos2021)
+
+# Verificando NA
+recebidos2021 |> 
+  filter(is.na(classe)) |> 
+  nrow()
+
+# Retirando NA
+recebidos2021  <-  recebidos2021 |> 
+  filter(!is.na(classe)) 
+
+# Separando variáveis desejadas
+recebidos2021_sep <- recebidos2021 |> 
+  select(classe:meio_processo) |>
+  group_by(classe) |> 
+  mutate(tipo = ifelse(classe %in% c("ARE","RE", "AI"), "recursal", "originario")) 
+
+#options(tibble.print_max = 50)
+
+# Total geral - originario e recursal
+recebidos_geral <- recebidos2021_sep |> 
+  group_by(tipo) |>
+  summarise(n = n())
+
+# Recebidos - Recursal - AI, ARE e RE
+recebidos_rec <- recebidos2021 |> 
+  filter(classe %in% c("ARE","AI","RE")) |>
+  group_by(classe) |>
+  summarise(n = n())
+
+
+# Tabela histórica - Recebidos
+hist_rec <- dados_historico |> 
+  select(ano:RE)
+
+originario <- recebidos_geral$n[1]
+recursal <- recebidos_geral$n[2]
+total_rec <- originario+recursal
+
+ARE <- recebidos_rec$n[2]
+AI <- recebidos_rec$n[1]
+RE <- recebidos_rec$n[3]
+ano <- 2021
+
+# Linha 2021
+tab_rec <- c(ano,total_rec,originario,recursal,
+             ARE,AI,RE)
+
+tabela_rec_total <- rbind(hist_rec,tab_rec)
+
+
+# Recebimento de Processos Originários por Classe
+
+# --------- Leitura dos dados históricos
+rec_class_hist <- read_excel("dados/relatorio_historico.xlsx", 
+                             sheet = "recebidos_classe")
+
+`%ni%` <- Negate(`%in%`)
+
+# Organização da tabela histórica
+tab_rec_class_hist <- recebidos2021 |>
+  filter(classe %ni% c("ARE","RE","AI")) |> 
+  group_by(classe) |> 
+  summarise(ano_2021 = n()) 
+
+# Tabela 2021
+tab_total_class <- rec_class_hist |> 
+  full_join(
+    tab_rec_class_hist, by = c("recebidos_classe" = "classe")
+  ) 
+
+tab_total_class[is.na(tab_total_class)] <- 0
+
+
+
+# Processos Registrados à Presidência -------------------------------------
+
+# Resultados 2021
+distribuidos2021 <- read_excel("dados/dados2021.xlsx", 
+                                  sheet = "DISTRIBUIDOS")
+  
+# Limpeza das variáveis
+distribuidos2021 <- janitor::clean_names(distribuidos2021)
+# View(acervo2021)
+
+# Verificando NA
+distribuidos2021 |> 
+  filter(is.na(subgrupo_andamento_comissao)) |> 
+  nrow()
+
+# Retirando NA
+distribuidos2021  <-  distribuidos2021 |> 
+  filter(!is.na(subgrupo_andamento_comissao)) 
+
+
+# Total (dist. ministros + reg. à presidência)
+distribuidos2021 |> 
+  select(subgrupo_andamento_comissao) |>  
+  summarise(n = n())  # Total = 76403
+
+# Separando variáveis desejadas
+distribuidos2021_sep <- distribuidos2021 |> 
+  select(classe:meio_processo, subgrupo_andamento_comissao) |>
+  group_by(classe) |> 
+  mutate(tipo = ifelse(classe %in% c("ARE","RE", "AI"), "recursal", "originario")) 
+
+# Registros à Presidência - Total
+reg_presid <- distribuidos2021_sep |> 
+  group_by(subgrupo_andamento_comissao) |> 
+  filter(subgrupo_andamento_comissao == "Registro à Presidência") |> 
+  summarise(n = n()) # Registro à Presidência = 44865
+
+# Registros à Presidência - Recursal
+reg_presid_recursal <- distribuidos2021_sep |> 
+  group_by(subgrupo_andamento_comissao) |> 
+  filter(subgrupo_andamento_comissao == "Registro à Presidência") |> 
+  filter(tipo == "recursal") |> 
+  summarise(n = n()) # Registro à Presidência = 44048
+
+
+# Registros à Presidência - Originário
+reg_presid_originario <- distribuidos2021_sep |> 
+  group_by(subgrupo_andamento_comissao) |> 
+  filter(subgrupo_andamento_comissao == "Registro à Presidência") |> 
+  filter(tipo == "originario") |> 
+  summarise(n = n()) # Registro à Presidência = 817
+
+
+
+# Processos Distribuídos aos Ministros ------------------------------------
+
+
+# Separando recursal/originário e presidente/ministros
+sep_subgrupo <- distribuidos2021 |> 
+select(classe:meio_processo, subgrupo_andamento_comissao) |>
+  group_by(subgrupo_andamento_comissao) |> 
+  mutate(tipo = ifelse(classe %in% c("ARE","RE", "AI"), "recursal", "originario")) |> 
+  mutate(destino = ifelse(subgrupo_andamento_comissao %in% "Registro à Presidência", "Registro à Presidência", subgrupo_andamento_comissao),
+         destino = ifelse(subgrupo_andamento_comissao %in% c("Exclusão Ministro","Normal", "Prevenção Relator", "Prevenção Turma"), "Distribuído aos Ministros", subgrupo_andamento_comissao)
+         ) 
+
+# Distribuídos aos Ministros - Total
+dist_min_total <- sep_subgrupo |> 
+  group_by(destino) |> 
+  filter(destino == "Distribuído aos Ministros") |> 
+  summarise(n = n()) 
+
+# Distribuídos aos Ministros - Recursal
+dist_min_recursal <- sep_subgrupo |> 
+  group_by(destino) |> 
+  filter(destino == "Distribuído aos Ministros") |> 
+  filter(tipo == "recursal") |> 
+  summarise(n = n()) 
+
+
+# Registros aos Ministros - Originário
+dist_min_orig <- sep_subgrupo |> 
+  group_by(destino) |> 
+  filter(destino == "Distribuído aos Ministros") |> 
+  filter(tipo == "originario") |> 
+  summarise(n = n()) 
+
+
+# Percentagem - Recursal (Presidente + Ministros)
+perc_presid_recur_2021 <- paste0(round(reg_presid_recursal$n/
+               (reg_presid_recursal$n+dist_min_recursal$n),4)*100,"%")
+
+
+perc_min_recur_2021 <- paste0(round(dist_min_recursal$n/
+                                      (dist_min_recursal$n+reg_presid_recursal$n),4)*100,"%")
+
+
+# Percentagem - Distribuídos geral
+
+# % Presidência
+perc_geral_presid <- paste0(round(reg_presid$n/
+                                    (reg_presid$n+dist_min_total$n),4)*100,"%")
+
+# % Ministros
+perc_geral_min <- paste0(round(dist_min_total$n/
+                                    (dist_min_total$n+reg_presid$n),4)*100,"%")
+
+
+# Juntando tabela histórica + dados 2021 - Presidência
+
+# Tabela 2020 - Registrados à Presidência
+hist_presid <- dados_historico |> 
+  select(ano,reg_presid_orig:reg_presid_total) |> 
+  mutate(perc_presid_recur = paste0(round(perc_presid_recur,4)*100,"%"))
+
+# Construindo tabela 2021
+pres_orig <- reg_presid_originario$n
+pres_recur <- reg_presid_recursal$n
+total_rec_pres <- pres_orig+pres_recur
+ano <- 2021
+
+# Linha 2021
+tab_pres_rec_final <- c(ano,pres_orig,pres_recur,
+                        perc_presid_recur_2021,
+                        total_rec_pres
+             )
+
+tabela_rec_pres_total <- rbind(hist_presid,tab_pres_rec_final)
+
+
+# Juntando tabela histórica + dados 2021 - Ministros
+
+# Tabela 2020 - Distribuídos aos ministros
+hist_min <- dados_historico |> 
+  select(ano,dist_min_orig:dist_min_total) |> 
+  mutate(perc_min_recur = paste0(round(perc_min_recur,4)*100,"%"))
+
+# Construindo tabela 2021
+min_orig <- dist_min_recursal$n
+min_recur <- dist_min_orig$n
+total_rec_min <- min_orig+min_recur
+ano <- 2021
+
+# Linha 2021
+tab_min_rec_final <- c(ano,min_orig,min_recur,
+                       perc_min_recur_2021,
+                       total_rec_min)
+
+tabela_rec_min_total <- rbind(hist_min,tab_min_rec_final)
+
+
+# Tabela histórica - Percentagens 
+hist_percent_geral <- dados_historico |> 
+  select(ano,percent_presid:percent_dist) |> 
+  mutate(percent_presid = paste0(round(percent_presid,4)*100,"%"),
+         percent_dist = paste0(round(percent_dist,4)*100,"%"))
+
+
+# Construindo tabela 2021
+percent_presid <- perc_geral_presid[1]
+percent_min <- perc_geral_min[1]
+ano <- 2021
+
+# Linha 2021
+tab_percent_geral <- c(ano,percent_presid,percent_min
+                      )
+tabela_perc_total <- rbind(hist_percent_geral,tab_percent_geral)
+
+
+
+# Resumo --------------------------------------------------------
+
+# Tabela 12: Processos Recebidos ------------------------------------------
+# Tabela 17: Recursos Recebidos por Classe --------------------------------
+# Tabela 19: Processos Originários por ano --------------------------------
+View(tabela_rec_total) 
+
+
+# Tabela 13: Processos Registrados à Presidência e Distribuídos aos Ministros --------
+View(tabela_perc_total)
+
+
+# Tabela 14: Processos Registrados à Presidência - Quantidade -------------
+# Tabela 15: Percentual de Recursos registrados à Presidência -------------
+# Tabela 16: Quantidade de Recursos registrados à Presidência -------------
+View(tabela_rec_pres_total)
+
+
+# Tabela 14: Processos Distribuídos aos Ministros - Quantidade -------------
+# Tabela 15: Percentual de Recursos Distribuídos aos Ministros ------------
+# Tabela 16: Quantidade de Recursos  Distribuídos aos Ministros -----------
+View(tabela_rec_min_total)
+
+
+# Tabela 21: Recebimento de Processos Originários por Classe --------------
+View(tab_total_class)
+
+
