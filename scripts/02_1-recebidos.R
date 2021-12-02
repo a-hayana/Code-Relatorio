@@ -89,6 +89,50 @@ tab_total_class <- rec_class_hist |>
 tab_total_class[is.na(tab_total_class)] <- 0
 
 
+
+# Recebimentos e baixa ----------------------------------------------------
+
+# Leituras
+
+# Tabela histórica
+produtiv_hist <- read_excel("dados/relatorio_historico.xlsx",
+                            sheet = "produtividade")
+
+# Baixados - 2021
+baixados2021 <- read_excel("dados/dados2021.xlsx",
+                           sheet = "BAIXADOS")
+
+# Recebidos - 2021 ->  recebidos2021
+
+
+# Separando variáveis desejadas - Tabela histórica
+receb_baixa_hist <- produtiv_hist|>
+  select(ano,recebimento:acervo_final) |>
+  mutate(taxa_produtiv = paste0(round(taxa_produtiv,4)*100,"%"))
+
+
+# Dados 2021 - recebidos, baixados e taxa de produtividade
+recebimento2021 <- recebidos2021 |>
+  nrow()
+
+baixa2021 <- baixados2021 |>
+  nrow()
+
+taxa_produtividade <- paste0(round(baixa2021/recebimento2021,4)*100,"%")
+
+ano <- 2021
+
+rec_baixa_2021 <- c(ano,
+                    recebimento2021,
+                    baixa2021,
+                    taxa_produtividade,
+                    tab1$acervo_total)
+
+# >>>>> NOTA: Carregar aba "01-acervo" para puxar tab1
+
+tabela_rec_baixa_total <- rbind(receb_baixa_hist,rec_baixa_2021)
+
+
 # Resumo --------------------------------------------------------
 
 # Tabela 12: Processos Recebidos ------------------------------------------
@@ -99,4 +143,7 @@ View(tabela_rec_total)
 # Tabela 21: Recebimento de Processos Originários por Classe --------------
 View(tab_total_class)
 
+
+# Tabela 30: Recebimento e Baixa de Processos -----------------------------
+View(tabela_rec_baixa_total)
 

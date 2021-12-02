@@ -53,9 +53,11 @@ reg_presid_originario <- distribuidos2021_sep |>
 # Resumo --------------------------------------------------------
 
 # Tabela 13: Processos Registrados à Presidência e Distribuídos aos Ministros --------
-View(tabela_perc_total)
+# View(tabela_perc_total)
+# NOTA: Tabela disponível na aba "02_3-distribuicaoaosministros.R"
 
 # Tabela 14: Processos Registrados à Presidência - Quantidade -------------
 # Tabela 15: Percentual de Recursos registrados à Presidência -------------
 # Tabela 16: Quantidade de Recursos registrados à Presidência -------------
-View(tabela_rec_pres_total)
+# View(tabela_rec_pres_total)
+# NOTA: Tabela disponível na aba "02_3-distribuicaoaosministros.R"

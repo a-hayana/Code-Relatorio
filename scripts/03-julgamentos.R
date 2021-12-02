@@ -66,7 +66,6 @@ dec_espec_2021 <- dec_espec_sub2 |>
   group_by(subgrupo2) |>
   summarise(n = sum(qtd_ocorrencias_processuais))
 
-# PENDENTE JUNTAR COM A TABELA HISTÓRICA
 
 dec_sobrestamento <- dec_espec_2021$n[6]
 dec_reperc_geral <- dec_espec_2021$n[5]
@@ -119,30 +118,8 @@ tab_dec <- c(ano,dec_final$n,total_dec,monocraticas,colegiadas)
 tabela_dec <- rbind(dados_historico,tab_dec)
 
 
-# Quantitativo de Decisões do Plenário por Classe -------------------------
-
-# PENDENTE!
-
-# Organização da tabela histórica - 2016 - 2020
-
-dec_plen_class <- read_excel("dados/relatorio_historico.xlsx",
-                             sheet = "dec_plen_class")
-
-
-tab_pleno_hist <- dec_plen_class |>
-  merge(dec_plen_class, all = TRUE) |>
-  tidyr::pivot_wider(
-    names_from = ano,
-    values_from = resultados
-  )
-
-# Falta 2021!
-
-
-
 # Quantitativo de Decisões por Orgão Julgador -----------------------------
 
-# PENDENTE!
 
 dec_org_julg_hist <- read_excel("dados/relatorio_historico.xlsx",
                            sheet = "dec_orgaos")
@@ -150,14 +127,96 @@ dec_org_julg_hist <- read_excel("dados/relatorio_historico.xlsx",
 
 # Organização da tabela histórica
 tab_org_julg_hist <- dec_org_julg_hist |>
-  merge(dec_org_julg, all = TRUE) |>
+  merge(dec_org_julg_hist, all = TRUE) |>
+  tidyr::pivot_wider(
+    names_from = ano,
+    values_from = resultados
+  )
+
+dec_org_julg2 <- decisoes2021 |>
+  group_by(orgao_julgador) |>
+  mutate(orgao_julgador2 = if_else(orgao_julgador %in% c("1ª TURMA", "1ª TURMA - SESSÃO VIRTUAL"), "Primeira Turma",
+                         if_else(orgao_julgador %in% c("2ª TURMA", "2ª TURMA - SESSÃO VIRTUAL"), "Segunda Turma",
+                                if_else(orgao_julgador %in% c("TRIBUNAL PLENO", "TRIBUNAL PLENO - SESSÃO VIRTUAL"), "Plenário",
+                                    if_else(orgao_julgador %in% "PLENÁRIO VIRTUAL - RG", "Plenário Virtual - RG", orgao_julgador))))) |>
+  relocate(orgao_julgador2, .after = orgao_julgador)
+
+
+
+# Total - Por órgão - 2021
+dec_orgao_2021 <- dec_org_julg2 |>
+  group_by(orgao_julgador2) |>
+  filter(orgao_julgador2 %in% c("Primeira Turma", "Segunda Turma",
+                            "Plenário","Plenário Virtual - RG")) |>
+  summarise(n = sum(qtd_ocorrencias_processuais))
+
+
+# Juntando as tabelas (histórica + 2021)
+plenario <- dec_orgao_2021$n[1]
+plen_virtual_rg <- dec_orgao_2021$n[2]
+primeira_turma <- dec_orgao_2021$n[3]
+segunda_turma <- dec_orgao_2021$n[4]
+
+
+tab_orgao <- c(plen_virtual_rg,
+               plenario,
+               primeira_turma,
+               segunda_turma)
+
+tabela_final_orgao <- cbind(tab_org_julg_hist,"2021" = tab_orgao)
+
+
+
+# Quantitativo de Decisões do Plenário por Classe -------------------------
+
+
+# Organização da tabela histórica - 2016 - 2020
+
+dec_plen_class <- read_excel("dados/relatorio_historico.xlsx",
+                             sheet = "dec_plen_class")
+
+
+# Organizando tabela histórica
+tab_pleno_hist <- dec_plen_class |>
+  merge(dec_plen_class, all = TRUE) |>
   tidyr::pivot_wider(
     names_from = ano,
     values_from = resultados
   )
 
 
-# Falta 2021!
+# Organizando dados do plenário por classe - 2021
+tab_plen_class <- dec_org_julg2 |>
+  group_by(orgao_julgador2, classe) |>
+  filter(orgao_julgador2 %in% "Plenário") |>
+  mutate(plen_classe = if_else(classe %in% c("ADC","ADI","ADO","ADPF"), "Controle Concentrado",
+                               if_else(classe %in% c("AP","EP","Ext","HC","Inq","PPE","RC","RHC","RvC"), "Classes Criminais",
+                                       if_else(classe %in% c("ARE","RE", "AI"), "Classes Recursais", "Demais Classes Originárias")))) |>
+  relocate(plen_classe, .after = classe) |>
+  relocate(orgao_julgador2, .after = plen_classe)
+
+
+# Total - Decisões do plenário por classe - 2021
+dec_plen_classe_2021 <- tab_plen_class |>
+  group_by(plen_classe) |>
+  summarise(n = sum(qtd_ocorrencias_processuais))
+
+# OBS: Divergência significativa nas Classes Recursais x Relatório
+
+# Juntando as tabelas (histórica + 2021)
+class_criminais <- dec_plen_classe_2021$n[1]
+class_recursais <- dec_plen_classe_2021$n[2]
+control_concent <- dec_plen_classe_2021$n[3]
+demais_class <- dec_plen_classe_2021$n[4]
+
+
+tab_plen_2021 <- c(class_criminais,
+                   class_recursais,
+                   control_concent,
+                   demais_class)
+
+tabela_final_orgao <- cbind(tab_pleno_hist,"2021" = tab_plen_2021)
+
 
 
 # Resumo ------------------------------------------------------------------
@@ -166,10 +225,16 @@ tab_org_julg_hist <- dec_org_julg_hist |>
 View(tabela_dec_especies_2021)
 
 
-
 # Tabela 22: Decisões - Finais e Total ------------------------------------
 # Tabela 24: Quantitativo de Decisões Monocráticas ------------------------
 # Tabela 25: Quantitativo de Decisões Colegiadas --------------------------
 View(tabela_dec)
 
+
+# Tabela 26: Quantitativo de Decisões por Orgão Julgador ------------------
+View(tabela_final_orgao)
+
+
+# Tabela 28: Quantitativo de Decisões do Plenário por Classe --------------
+View(tabela_final_orgao)
 

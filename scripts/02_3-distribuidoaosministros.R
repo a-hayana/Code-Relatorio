@@ -121,3 +121,9 @@ View(tabela_perc_total)
 # Tabela 15: Percentual de Recursos Distribuídos aos Ministros ------------
 # Tabela 16: Quantidade de Recursos  Distribuídos aos Ministros -----------
 View(tabela_rec_min_total)
+
+
+# Tabela 14: Processos Registrados à Presidência - Quantidade -------------
+# Tabela 15: Percentual de Recursos registrados à Presidência -------------
+# Tabela 16: Quantidade de Recursos registrados à Presidência -------------
+View(tabela_rec_pres_total)
