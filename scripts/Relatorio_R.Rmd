@@ -426,6 +426,7 @@ tx_recorr |>
         axis.ticks.y=element_blank())
 
 
+
 ```
 
 <center><span class="border-highlight"><b>Gráfico 18 </center> </span></b>
