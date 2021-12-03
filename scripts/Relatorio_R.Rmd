@@ -70,8 +70,8 @@ Processos = c(2772, 1309, 3780, 18395)),
 
 dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
 
-ggplot(dados, aes(x = Ano, y = Processos)) +
-  geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity") + 
+ggplot(dados, aes(x = Ano, y = Processos)) + 
+  geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity",show.legend = FALSE) + 
   ggtitle("Acervo por ano de autuação") +
   labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021.")+
   geom_label(aes(label = Processos),
@@ -79,7 +79,12 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
              vjust = 0.5, size = 3.5, hjust = 0.5)+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
-  coord_flip() 
+  coord_flip() +
+        theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank())
 
 ```
 
@@ -124,14 +129,19 @@ Processos = c(tabela_rec_total$recebidos)),
 dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
 
 ggplot(dados, aes(x = Ano, y = Processos)) +
-  geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity") + 
+  geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity", show.legend = FALSE) + 
   ggtitle("Processos Recebidos") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2020.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 202.")+
   geom_label(aes(label = Processos),
              position = position_dodge(0.9), 
              vjust = 0.5, size = 3.5, hjust = 0.5)+
   scale_fill_brewer(palette = "Blues") +
-  ggthemes::theme_fivethirtyeight()
+  ggthemes::theme_fivethirtyeight()+
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank())
 
 ```
 
@@ -200,14 +210,19 @@ Processos = c(tabela_rec_total$originario)),
 dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
 
 ggplot(dados, aes(x = Ano, y = Processos)) +
-  geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity") + 
+  geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity",show.legend = FALSE) + 
   ggtitle("Processos originários") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2020.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
   geom_label(aes(label = Processos),
              position = position_dodge(0.9), 
              vjust = 0.5, size = 3.5, hjust = 0.5)+
   scale_fill_brewer(palette = "Blues") +
-  ggthemes::theme_fivethirtyeight()
+  ggthemes::theme_fivethirtyeight()+
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank())
 
 ```
 
@@ -284,14 +299,19 @@ Processos = c(tabela_dec$decisoes_monocraticas)),
 dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
 
 ggplot(dados, aes(x = Ano, y = Processos)) +
-  geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity") + 
+  geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity", show.legend = FALSE) + 
   ggtitle("Decisões Monocráticas") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2020.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
   geom_label(aes(label = Processos),
              position = position_dodge(0.9), 
              vjust = 0.5, size = 3.5, hjust = 0.5)+
   scale_fill_brewer(palette = "Blues") +
-  ggthemes::theme_fivethirtyeight()
+  ggthemes::theme_fivethirtyeight()+
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank())
 
 ```
 
@@ -308,14 +328,19 @@ Processos = c(tabela_dec$decisoes_colegiadas)),
 dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
 
 ggplot(dados, aes(x = Ano, y = Processos)) +
-  geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity") + 
+  geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity", show.legend = FALSE) + 
   ggtitle("Decisões Colegiadas") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2020.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
   geom_label(aes(label = Processos),
              position = position_dodge(0.9), 
              vjust = 0.5, size = 3.5, hjust = 0.5)+
   scale_fill_brewer(palette = "Blues") +
-  ggthemes::theme_fivethirtyeight()
+  ggthemes::theme_fivethirtyeight()+
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank())
 
 ```
 
@@ -385,47 +410,20 @@ Após a decisão monocrática, pode haver a interposição de agravo regimental 
 
 ```{r echo=FALSE, warning=FALSE}
 
+tx_recorr <- readRDS("../data_raw/tabela_recorr_2021_total.rds")
 
-# tabela_acervo <- readRDS("../data_raw/tabela_acervo.rds")
-# 
-# library(patchwork)
-# g1 <- tabela_acervo |> 
-#   ggplot(aes(x = ano, y = eletronico*100)) +
-#   geom_line() +
-#   geom_label(aes(label = paste0(eletronico*100, "%")))+
-#   ggtitle("Processos Eletrônicos") +
-#   labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
-#   scale_fill_brewer(palette = "Blues") +
-#   ggthemes::theme_fivethirtyeight()
-# 
-# 
-# g2 <- tabela_acervo |> 
-#   ggplot(aes(x = ano, y = fisico*100)) +
-#   geom_line() +
-#   geom_label(aes(label = paste0(fisico*100, "%")))+
-#   ggtitle("Processos Físicos") +
-#   labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
-#   scale_fill_brewer(palette = "Blues") +
-#   ggthemes::theme_fivethirtyeight()
-# 
-# (g1 / g2)
-# 
-# # -------------------------------------------------
-# 
-# graph_acervo <- data.frame(ano=tabela_acervo$ano,
-#                           eletronico=tabela_acervo$eletronico*100,
-#                           fisico=tabela_acervo$fisico*100)
-# 
-# 
-# ggplot(graph_acervo, aes(x = ano)) +
-# geom_line(aes(y = eletronico), size = 0.5)+
-# geom_point(aes(y = eletronico), size = 3, shape=18, color="red", linetype=4) +
-# geom_line(aes(y = fisico), size = 0.5)+
-# geom_point(aes(y = fisico), size = 3, color="blue")+
-# labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
-#   scale_fill_brewer(palette = "Blues") +
-#   ggthemes::theme_fivethirtyeight()
-
+tx_recorr |>
+  ggplot(aes(x = ano, y = taxa_rec)) +
+  geom_line() +
+  geom_label(aes(label = paste0(taxa_rec, "%")))+
+  ggtitle("Taxa de recorribilidade") +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight()+
+  coord_cartesian(ylim = c(10, 50))+
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
 
 
 ```

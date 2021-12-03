@@ -7,7 +7,7 @@ recor_hist <- read_excel("dados/relatorio_historico.xlsx",
 # Tabela histórica - Recorribilidade ----------------------------
 recor_geral <- recor_hist |>
   select(ano,taxa_rec) |>
-  mutate(taxa_rec = paste0(round(taxa_rec,1)*100,"%"))
+  mutate(taxa_rec = round(taxa_rec,4)*100)
 
 # Tabela 2021 -------------------------------------------------------------
 
@@ -32,11 +32,11 @@ decisoes_total <- decisoes2021 |>
   summarise(n = sum(qtd_ocorrencias_processuais))
 
 
-taxa_recorr <- paste0(round(recursos2021/decisoes_total,2)*100,"%")
+taxa_recorr <- round(recursos2021/decisoes_total,4)*100
 
 ano <- 2021
 
-taxa_recorr_2021 <- c(ano,taxa_recorr)
+taxa_recorr_2021 <- c(ano,taxa_recorr$n)
 
 tabela_recorr_2021_total <- rbind(recor_geral,taxa_recorr_2021)
 
