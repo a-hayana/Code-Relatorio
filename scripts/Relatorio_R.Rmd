@@ -412,7 +412,6 @@ Após a decisão monocrática, pode haver a interposição de agravo regimental 
 
 tx_recorr <- readRDS("../data_raw/tabela_recorr_2021_total.rds")
 
-
 tx_recorr |>
   ggplot(aes(x = ano, y = taxa_rec)) +
   geom_line() +
