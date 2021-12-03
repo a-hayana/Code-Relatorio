@@ -1,9 +1,8 @@
-
 # Recorribilidade ---------------------------------------------------------
 
 # --------- Leitura dos dados históricos
 recor_hist <- read_excel("dados/relatorio_historico.xlsx",
-                                 sheet = "recorribilidade")
+                         sheet = "recorribilidade")
 
 # Tabela histórica - Recorribilidade ----------------------------
 recor_geral <- recor_hist |>
@@ -13,7 +12,7 @@ recor_geral <- recor_hist |>
 # Tabela 2021 -------------------------------------------------------------
 
 recorr2021 <- read_excel("dados/dados2021.xlsx",
-                                 sheet = "RECURSO")
+                         sheet = "RECURSO")
 
 # Limpeza das variáveis
 recorr2021 <- janitor::clean_names(recorr2021)
@@ -44,4 +43,4 @@ tabela_recorr_2021_total <- rbind(recor_geral,taxa_recorr_2021)
 
 # Tabela 29: Taxa de Recorribilidade --------------------------------------
 View(tabela_recorr_2021_total)
-
+# saveRDS(tabela_recorr_2021_total, "tabela_recorr_2021_total.rds")

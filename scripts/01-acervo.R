@@ -18,38 +18,40 @@ acervo2021 <- janitor::clean_names(acervo2021)
 
 
 # Verificando NA
-acervo2021 |> 
+acervo2021 |>
   filter(is.na(classe))
 
 # Separando variáveis desejadas
-acervo2021_sep <- acervo2021 |> 
+acervo2021_sep <- acervo2021 |>
   select(classe:meio_processo) |>
-  group_by(classe) |> 
-  mutate(tipo = ifelse(classe %in% c("ARE","RE", "AI"), "recursal", "originario")) 
+  group_by(classe) |>
+  mutate(tipo = ifelse(classe %in% c("ARE","RE", "AI"), "recursal", "originario"))
 
 options(tibble.print_max = 50)
 
-# acervo2021_sep |> 
-#   group_by(tipo,classe) |> 
-#   summarise(n = n()) 
+# acervo2021_sep |>
+#   group_by(tipo,classe) |>
+#   summarise(n = n())
 
 tab1 <- bind_rows(
-acervo2021_sep |> 
+acervo2021_sep |>
   group_by(tipo) |>
   summarise(n = n()),
-acervo2021_sep |> 
-  group_by(meio_processo) |> 
-  summarise(n=n()) |> 
-  janitor::adorn_percentages("col") |> 
-  rename(tipo = meio_processo)) |> 
-  tidyr::pivot_wider(names_from = tipo, values_from = n) |> 
-  janitor::clean_names() |> 
-  mutate(ano = 2021, .before = originario) |> 
-  mutate(acervo_total = originario + recursal, 
+acervo2021_sep |>
+  group_by(meio_processo) |>
+  summarise(n=n()) |>
+  janitor::adorn_percentages("col") |>
+  rename(tipo = meio_processo)) |>
+  tidyr::pivot_wider(names_from = tipo, values_from = n) |>
+  janitor::clean_names() |>
+  mutate(ano = 2021, .before = originario) |>
+  mutate(acervo_total = originario + recursal,
          eletronico = round(eletronico,3),
          fisico = round(fisico,3))
-  
+
 tabela_acervo <- rbind(dados_historico,tab1)
+
+
 
 
 # Resumo ------------------------------------------------------------------
@@ -57,7 +59,7 @@ tabela_acervo <- rbind(dados_historico,tab1)
 # Tabela 8: Evolução do Acervo - Originários e Recursais ------------------
 # Tabela 11: Acervo Físico x Eletrônico -----------------------------------
 View(tabela_acervo)
-
+# saveRDS(tabela_acervo, "tabela_acervo.rds")
 
 
 

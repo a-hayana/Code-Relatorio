@@ -1,0 +1,66 @@
+```{css, echo = FALSE}
+
+/* Elementos da página */
+h1,h2,h3,h4,h5,h6,legend{
+    color: #008B8B;
+}
+
+#nav-top span.glyphicon {
+  color: #008B8B;
+}
+
+#table-of-contents header{
+    color:#008B8B;
+    background-color: #008B8B;
+}
+
+#table-of-contents h2{
+    background-color:#22983B;
+}
+
+#sidebar {
+    color: #D9AB16;
+    background: #113458;
+}
+
+#sidebar h2 {
+    color: #FFFFFF;
+    background-color: #4096B8;
+}
+
+#sidebar a {
+    color: #FFFFFF;
+}
+
+ul {
+    list-style:none;
+}
+
+/* Alinhamento justificado */ 
+div
+{
+text-align: justify;
+text-justificar: inter-palavra;
+}
+
+/* Borda tracejada */
+.border-highlight{
+  border:2px dashed red;  
+  padding:0.03em 0.25em;
+}
+
+
+/* Links colors */
+#main :not(.leaflet-control) > a {
+    background-image: none;
+    background-size: none;
+    background-repeat: no-repeat;
+    background-position: none;
+    color: #008b8b !important;
+    font-weight: 300;
+    padding: none;
+    transition: none !important;
+    animation: none;
+    
+
+```

@@ -176,6 +176,7 @@ dec_plen_class <- read_excel("dados/relatorio_historico.xlsx",
                              sheet = "dec_plen_class")
 
 
+
 # Organizando tabela histórica
 tab_pleno_hist <- dec_plen_class |>
   merge(dec_plen_class, all = TRUE) |>
@@ -184,11 +185,16 @@ tab_pleno_hist <- dec_plen_class |>
     values_from = resultados
   )
 
+#
+# dec_org_julg2 |>
+#   group_by(orgao_julgador) |>
+#   summarise(n = n())
+
 
 # Organizando dados do plenário por classe - 2021
 tab_plen_class <- dec_org_julg2 |>
   group_by(orgao_julgador2, classe) |>
-  filter(orgao_julgador2 %in% "Plenário") |>
+  filter(orgao_julgador2 %in% c("Plenário","Plenário Virtual - RG")) |>
   mutate(plen_classe = if_else(classe %in% c("ADC","ADI","ADO","ADPF"), "Controle Concentrado",
                                if_else(classe %in% c("AP","EP","Ext","HC","Inq","PPE","RC","RHC","RvC"), "Classes Criminais",
                                        if_else(classe %in% c("ARE","RE", "AI"), "Classes Recursais", "Demais Classes Originárias")))) |>
@@ -196,12 +202,13 @@ tab_plen_class <- dec_org_julg2 |>
   relocate(orgao_julgador2, .after = plen_classe)
 
 
+
 # Total - Decisões do plenário por classe - 2021
 dec_plen_classe_2021 <- tab_plen_class |>
   group_by(plen_classe) |>
-  summarise(n = sum(qtd_ocorrencias_processuais))
+  summarise(n = sum(qtd_ocorrencias_processuais)) #|>
+  #janitor::adorn_totals("row")
 
-# OBS: Divergência significativa nas Classes Recursais x Relatório
 
 # Juntando as tabelas (histórica + 2021)
 class_criminais <- dec_plen_classe_2021$n[1]
@@ -215,7 +222,7 @@ tab_plen_2021 <- c(class_criminais,
                    control_concent,
                    demais_class)
 
-tabela_final_orgao <- cbind(tab_pleno_hist,"2021" = tab_plen_2021)
+tabela_final_plen <- cbind(tab_pleno_hist,"2021" = tab_plen_2021)
 
 
 
@@ -223,18 +230,20 @@ tabela_final_orgao <- cbind(tab_pleno_hist,"2021" = tab_plen_2021)
 
 # Tabela 23: Quantitativo de Decisões por Espécie -------------------------
 View(tabela_dec_especies_2021)
+# saveRDS(tabela_dec_especies_2021, "tabela_dec_especies_2021.rds")
 
 
 # Tabela 22: Decisões - Finais e Total ------------------------------------
 # Tabela 24: Quantitativo de Decisões Monocráticas ------------------------
 # Tabela 25: Quantitativo de Decisões Colegiadas --------------------------
 View(tabela_dec)
-
+# saveRDS(tabela_dec, "tabela_dec.rds")
 
 # Tabela 26: Quantitativo de Decisões por Orgão Julgador ------------------
 View(tabela_final_orgao)
+# saveRDS(tabela_final_orgao, "tabela_final_orgao.rds")
 
 
 # Tabela 28: Quantitativo de Decisões do Plenário por Classe --------------
-View(tabela_final_orgao)
-
+View(tabela_final_plen)
+# saveRDS(tabela_final_plen, "tabela_final_plen.rds")

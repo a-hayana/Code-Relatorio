@@ -25,4 +25,6 @@ temas_julg_hist <- produtiv_hist |>
 
 # PENDENTE!
 # RECEBIDOS/BAIXA -> Ver aba "02_1-recebidos"
-# RG RECONHECIDA / RG NEGADA / MERITO JULGADO / REAF. JURIS
+
+
+# Falta:RG RECONHECIDA / RG NEGADA / MERITO JULGADO / REAF. JURIS
