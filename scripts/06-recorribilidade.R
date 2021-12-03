@@ -43,4 +43,4 @@ tabela_recorr_2021_total <- rbind(recor_geral,taxa_recorr_2021)
 
 # Tabela 29: Taxa de Recorribilidade --------------------------------------
 View(tabela_recorr_2021_total)
-# saveRDS(tabela_recorr_2021_total, "tabela_recorr_2021_total.rds")
+saveRDS(tabela_recorr_2021_total, "tabela_recorr_2021_total.rds")
