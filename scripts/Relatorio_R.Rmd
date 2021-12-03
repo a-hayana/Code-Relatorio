@@ -52,7 +52,7 @@ Em relação às decisões, contabilizou-se <mark>99.517</mark>, sendo <mark>81.
 O acervo geral do STF corresponde ao quantitativo de processos em tramitação no dia 31/12/2020, computados os registrados à presidência e distribuídos aos ministros. Em 2020, o Tribunal registrou o menor acervo processual dos últimos 21^[O [Relatório de atividades do biênio 2004 a 2006 ](http://www.stf.jus.br/arquivo/cms/centralDoCidadaoAcessoInformacaoGestaoEstrategica/anexo/Relatorio_de_Atividades_2004_a_2006.pdf) mostra dados do ano de 2000 que demonstram que haviam pelo menos 127 mil processos sem setença. O Relatório de Gestão de 2020 do Ministro Dias Tofolli apresenta a informação que seria nos últimos 24 anos e precisaria ser levantado junto à SAE em relatórios anteriores.] anos, com <mark>26.256</mark> processos em tramitação.Desde 2016 a corte acumula uma redução de aproximadamente <mark>56%</mark> no acervo
 geral.
 
-```{r acervo_total, echo=FALSE, warning=FALSE}
+```{r grafico1, echo=FALSE, warning=FALSE}
 
 tabela_acervo <- readRDS("../data_raw/tabela_acervo.rds")
 
@@ -80,9 +80,9 @@ tabela_acervo  |>
 
 Os gráficos abaixo mostram a evolução dos processos originários e recursais, desde 2016. Houve uma redução em 16% no acervo de 2019 para 2020.
 
-```{r acervo_originario_recursal, echo=FALSE, warning=FALSE}
+```{r grafico2, echo=FALSE, warning=FALSE}
 
-# NÃO OK
+# NÃO OK - Euler ajuda aqui!
 
 grupo <- as.factor(c(rep("originario", times=6), rep("recursal", times=6)))
 
@@ -104,16 +104,14 @@ df |>
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
 
-
- 
 ```
 
 <center><span class="border-highlight"><b>Gráfico 2</center> </span></b>
 
 Historicamente há uma certa estabilidade em relação aos processos originários. Para os recursais, no entanto, há uma expressiva redução no acervo de magnitude de 70% em relação a 2016, e de 20% com relação a 2019.
 
-```{r echo=FALSE, warning=FALSE}
-# Esboço 
+```{r grafico3, echo=FALSE, warning=FALSE}
+# Esboço - Falta dados 2021 - Euler
 
 dados <-
   structure(list(Ano = c("Anteriores a 2016", "2016 a 2017", "2018 a 2019", "2020"), 
@@ -131,7 +129,6 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
   ggthemes::theme_fivethirtyeight()+
   coord_flip() 
 
-# Falta 2021
 
 ```
 
@@ -147,7 +144,9 @@ Com relação ao Ramo do Direito, a categoria Direito Administrativo e Outras Ma
 
 Por fim, a tramitação por meio eletrônico corresponde a 96% do acervo de 2020, conforme gráfico a seguir.
 
-```{r echo=FALSE, warning=FALSE}
+```{r grafico4, echo=FALSE, , warning=FALSE}
+# Não consegui colocar legenda físico/eletrônico
+# Ajuda Euler
 
 library(ggrepel)
 
@@ -170,7 +169,7 @@ labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relat�
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()
 
-# Não consegui colocar legenda físico/eletrônico
+
 ```
 
 
@@ -190,7 +189,7 @@ O processamento começa com o recebimento, autuação e análise inicial do proc
 
 Em 2020, o STF recebeu <mark>75.137</mark> processos, uma queda de <mark>20%</mark> em relação ao ano de 2019.
 
-```{r echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
+```{r grafico5, echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
 # 2021 - OK
 # Dados RDS
 tabela_rec_total <- readRDS("../data_raw/tabela_rec_total.rds")
@@ -205,7 +204,7 @@ dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
 ggplot(dados, aes(x = Ano, y = Processos)) +
   geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity", show.legend = FALSE) + 
   ggtitle("Processos Recebidos") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 202.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
   geom_label(aes(label = Processos),
              position = position_dodge(0.9), 
              vjust = 0.5, size = 3.5, hjust = 0.5)+
@@ -223,7 +222,19 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
 
 Uma vez recebidos, os processos são autuados pela SEJ, com posterior registro à Presidência ou distribuição aos Ministros. <mark>51%</mark> dos processos recebidos foram registrados à Presidência. A ampliação da atuação da presidência pode ser observada nos gráficos a seguir, que mostram o percentual e a quantidade de registros, respectivamente:
 
+```{r grafico6, echo=FALSE, warning=FALSE}
+
+# FALTANDO!
+
+```
+
 <center><span class="border-highlight"><b>Gráfico 6 </center> </span></b>
+
+```{r grafico7, echo=FALSE, warning=TRUE}
+
+# FALTANDO!
+
+```
 
 <center><span class="border-highlight"><b>Gráfico 7 </center> </span></b>
 
@@ -240,8 +251,19 @@ Obs: Neste ponto, fazer um infográfico como o da página 31 do Relatório de At
 
 Os dois gráficos a seguir mostram, respectivamente, os percentuais e quantidades de recursos registrados à presidência e distribuídos aos ministros.
 
+
+```{r grafico8, echo=FALSE, warning=TRUE}
+
+# FALTANDO!
+
+```
 <center><span class="border-highlight"><b>Gráfico 8 </center> </span></b>
 
+```{r grafico9, echo=FALSE, warning=TRUE}
+
+# FALTANDO!
+
+```
 <center><span class="border-highlight"><b>Gráfico 9 </center> </span></b>
 
 Este significativo avanço da atuação da Presidência na esfera recursal é resultado da implementação do projeto estratégico Juízo de Admissibilidade, que ampliou a atuação do Núcleo de Análise de Recursos (NARE) e do Núcleo de Repercussão Geral (NURG), no âmbito da Presidência, e de setores especializados na SEJ. Essas unidades são responsáveis pela apreciação de recursos manifestamente inadmissíveis ou inaptos, bem como pela aplicação da sistemática da repercussão geral.
@@ -252,7 +274,19 @@ ao STF.
 Os dois gráficos a seguir mostram a evolução dos processos recebidos em classes recursais apenas para o ano de 2020. Desse total, foram
 registrados à Presidência por mês <mark>3.101 processos</mark>, em média. Foram distribuídos aos Ministros 2.930 processos por mês, em média, no mesmo período.
 
+```{r grafico10, echo=FALSE, warning=TRUE}
+
+# FALTANDO!
+
+```
 <center><span class="border-highlight"><b>Gráfico 10 </center> </span></b>
+
+
+```{r grafico11, echo=FALSE, warning=TRUE}
+
+# FALTANDO!
+
+```
 
 <center><span class="border-highlight"><b>Gráfico 11 </center> </span></b>
 
@@ -260,18 +294,23 @@ Redução percentual de <b>23%</b> de recebimentos de ARE em relação a 2019 <m
 
 Conforme relatório sobre a taxa de provimento, as decisões dos tribunais de origem são confirmadas pelo Supremo em <mark>5,2%</mark>^[Sugiro usar a partir de 2015 ou 2016 para inserir no Relatório de Atividades.] dos casos. A taxa de provimento por classes é de <mark>1,2%</mark> para ARE e <mark>22,2%</mark> para RE.
 
+```{r grafico12, echo=FALSE, warning=TRUE}
+
+# FALTANDO!
+
+```
 <center><span class="border-highlight"><b>Gráfico 12 </center> </span></b>
 
 Dos recursos apresentados à Presidência aproximadamente <mark>90%</mark> dos óbices
 eram relacionados aos seguintes motivos:
 
-<center><span class="border-highlight"><b>Tabela 3 </center> </span></b>
+<center><span class="border-highlight"><b>Tabela 3 - Motivo inaptidão - Euler </center> </span></b>
 
 ### Recebimento de Originários
 
 Em 2020, o STF recebeu <mark>25.354</mark> processos originários. É possível notar, no gráfico a seguir, aumento substancial de 20% em relação ao ano anterior.
 
-```{r echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
+```{r grafico13, echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
 # 2021 - OK
 # Dados RDS
 tabela_rec_total <- readRDS("../data_raw/tabela_rec_total.rds")
@@ -304,6 +343,12 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
 
 Para o ano de 2020, temos, em bases percentuais:
 
+```{r grafico14, warning=TRUE}
+
+# PENDENTE!
+# Anual - Euler
+```
+
 <center><span class="border-highlight"><b>Gráfico 14 </center> </span></b>
 
 A tabela a seguir mostra o recebimento de processos originários por classe:
@@ -333,13 +378,19 @@ colnames(tab_total_class) <- c("Classe originária", "Grupo","2016","2017","2018
 O julgamento do processo é identificado pela decisão final, a qual extingue o processo ainda que o mérito da causa não seja apreciado. É o que ocorre, por exemplo, nas decisões de não conhecimento, de prejudicialidade, de homologação de desistência e de negativa de seguimento. Se houver decisão final no processo e decurso do prazo processual sem interposição de recurso, ocorrerá o trânsito em julgado da decisão e, subsequentemente, a baixa do processo. No mais, destaca-se que é possível a cumulação de mais de uma decisão em cada feito. O
 gráfico a seguir mostra a quantidade de decisões e a quantidade de decisões finais.
 
+```{r grafico15, warning=TRUE}
+
+# PENDENTE! 
+
+```
+
 <center><span class="border-highlight"><b>Gráfico 15 </center> </span></b>
 
 Além da decisão final, há outras espécies em menor quantidade, conforme apresentado na tabela seguinte com os respectivos quantitativos.
 
 
 ```{r decisoes_especie, echo=FALSE, warning=FALSE}
-
+# OK - 2021
 # Dados RDS
 tabela_dec_especies_2021 <- readRDS("../data_raw/tabela_dec_especies_2021.rds")
 
@@ -360,7 +411,7 @@ colnames(tabela_dec_especies_2021)[1] <- "Decisões por espécie"
 Ademais, as decisões podem ser classificadas em monocráticas <mark>(82%)</mark> e colegiadas<mark>(18%)</mark>. Entre as monocráticas, <mark>56%</mark> foram decisões proferidas por Ministros e <mark>44%</mark> pelo Ministro Presidente. Entre as decisões colegiadas, cerca de <mark>68%</mark> foram proferidas pelas turmas e <mark>32%</mark> pelo Plenário. <mark>Houve um aumento de 2% nas decisões colegiadas, reforçando o princípio da Colegialidade.</mark> Os gráficos a seguir mostram o quantitativo de decisões monocráticas e colegiadas por ano.
 
 
-```{r echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
+```{r grafico16, echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
 # 2021 - OK
 # Dados RDS
 tabela_dec <- readRDS("../data_raw/tabela_dec.rds")
@@ -389,7 +440,9 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
 
 ```
 
-```{r echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
+<center><span class="border-highlight"><b>Gráfico 16 </center> </span></b>
+
+```{r grafico17, echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
 # 2021 - OK
 # Dados RDS
 tabela_dec <- readRDS("../data_raw/tabela_dec.rds")
@@ -418,13 +471,11 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
 
 ```
 
-<center><span class="border-highlight"><b>Gráfico 16 </center> </span></b>
-
 <center><span class="border-highlight"><b>Gráfico 17 </center> </span></b>
 
 A tabela a seguir mostra o quantitativo de decisões por órgão julgador:
 
-```{r orgao_julgador, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE}
 
 # Dados RDS
 tabela_final_orgao <- readRDS("../data_raw/tabela_final_orgao.rds")
@@ -482,7 +533,7 @@ pautados, instaurando-se o debate democrático que deve preceder à análise de 
 
 Após a decisão monocrática, pode haver a interposição de agravo regimental ou a oposição de embargos de declaração, infringentes ou de divergência. Nesses casos, o processo será concluso ao relator para que o recurso interno seja julgado. O gráfico a seguir mostra a taxa de recorribilidade ao longo dos anos.
 
-```{r echo=FALSE, warning=FALSE}
+```{r grafico18, echo=FALSE, warning=FALSE}
 
 tx_recorr <- readRDS("../data_raw/tabela_recorr_2021_total.rds")
 
@@ -498,9 +549,6 @@ tx_recorr |>
   theme(axis.title.y=element_blank(),
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
-
-
-
 
 ```
 
@@ -533,11 +581,16 @@ colnames(tabela_rec_baixa_total) <- c("Produtividade","Recebimento","Baixa","Tax
 A taxa de produtividade foi de <mark>104,4%</mark>. O acervo final de 2020, observado em 31/12/2020, foi cerca de <mark>16%</mark> menor do que o acervo final de 2019.
 Esse resultado demonstra o esforço do STF em tornar o processo de julgamento mais célere. Por fim, o gráfico a seguir mostra a quantidade de processos baixados, recebidos e o acervo final por ano.
 
+```{r grafico19}
+
+# PENDENTE!
+```
+
 <center><span class="border-highlight"><b>Gráfico 19 </center> </span></b>
 
 # Relatório da Repercussão Geral
 
-<center><span class="border-highlight"><b>Tabela 10 </center> </span></b>
+<center><span class="border-highlight"><b>Tabela 10 - Euler </center> </span></b>
 
 Dos <mark>52</mark> novos temas apreciados no plenário virtual, <mark>30</mark> tiveram repercussão geral reconhecida e <mark>22</mark> tiveram repercussão geral não reconhecida. Dos <mark>134</mark> temas julgados, <mark>125</mark> tiveram mérito julgado e 9 tiveram reafirmação de jurisprudência, representando um aumento de aproximadamente <mark>14%</mark> em relação a 2019.
 
@@ -562,10 +615,21 @@ Finalidades:
 O gráfico a seguir mostra a evolução da quantidade de temas apreciados
 no Plenário Virtual por ano:
 
+```{r grafico20}
+
+# PENDENTE!
+# Ajuda Euler
+```
+
 <center><span class="border-highlight"><b>Gráfico 20 </center> </span></b>
 
 Houve queda no total de temas julgados no plenário virtual e nos temas com repercussão geral reconhecida. Apenas os temas com repercussão geral negada tiveram expressivo aumento. O próximo gráfico mostra o total de temas julgados por ano:
 
+```{r grafico21}
+
+# PENDENTE!
+# Ajuda Euler
+```
 <center><span class="border-highlight"><b>Gráfico 21 </center> </span></b>
 
 Houve um forte aumento no total de temas julgados e no total de temas com mérito julgado. O total de temas com reafirmação de jurisprudência também aumentou, porém de modo mais tímido.
@@ -585,6 +649,7 @@ Em parceria com o STJ e o CNJ, a Presidência do STF realizou, nas instâncias d
 ## Teses firmadas e liberação de processos em todo o País
 
 O julgamento de mérito de temas de repercussão geral tem como consequência a imediata liberação para julgamento dos processos correlatos que tenham sido sobrestados nos tribunais de origem e também no próprio STF. Mais de <mark>187</mark> mil processos foram liberados para as instâncias de origem em 2020, como bem mostra a tabela a seguir:
+
 
 <center><span class="border-highlight"><b>Tabela 11 </center> </span></b>
 
