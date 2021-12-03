@@ -52,24 +52,74 @@ Em relação às decisões, contabilizou-se <mark>99.517</mark>, sendo <mark>81.
 O acervo geral do STF corresponde ao quantitativo de processos em tramitação no dia 31/12/2020, computados os registrados à presidência e distribuídos aos ministros. Em 2020, o Tribunal registrou o menor acervo processual dos últimos 21^[O [Relatório de atividades do biênio 2004 a 2006 ](http://www.stf.jus.br/arquivo/cms/centralDoCidadaoAcessoInformacaoGestaoEstrategica/anexo/Relatorio_de_Atividades_2004_a_2006.pdf) mostra dados do ano de 2000 que demonstram que haviam pelo menos 127 mil processos sem setença. O Relatório de Gestão de 2020 do Ministro Dias Tofolli apresenta a informação que seria nos últimos 24 anos e precisaria ser levantado junto à SAE em relatórios anteriores.] anos, com <mark>26.256</mark> processos em tramitação.Desde 2016 a corte acumula uma redução de aproximadamente <mark>56%</mark> no acervo
 geral.
 
+```{r acervo_total, echo=FALSE, warning=FALSE}
+
+tabela_acervo <- readRDS("../data_raw/tabela_acervo.rds")
+
+
+tabela_acervo  |>
+  ggplot(aes(x = ano, y = acervo_total)) +
+  geom_text(aes(label = acervo_total),
+            position = position_stack(vjust = 1.1))+
+  ggtitle("Acervo processual") +
+  geom_area(fill = 4,
+            alpha = 0.5)+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight()+
+  #coord_cartesian(ylim = c(0, 60000))+
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+
+
+ 
+```
+
 <center><span class="border-highlight"><b>Gráfico 1</center> </span></b>
 
 Os gráficos abaixo mostram a evolução dos processos originários e recursais, desde 2016. Houve uma redução em 16% no acervo de 2019 para 2020.
+
+```{r acervo_originario_recursal, echo=FALSE, warning=FALSE}
+
+# NÃO OK
+
+grupo <- as.factor(c(rep("originario", times=6), rep("recursal", times=6)))
+
+valores <- c(tabela_acervo$originario,tabela_acervo$recursal)
+
+ano  <- factor(tabela_acervo$ano, levels = unique(tabela_acervo$ano))
+df <- data.frame(ano,valores,grupo)
+
+df |>
+  ggplot(aes(x = ano, y = valores), fill=grupo) +
+  geom_text(aes(label = valores),
+            position = position_stack(vjust = 1.1))+
+  ggtitle("Originários e recursais") +
+  geom_area(aes(fill = grupo)) +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+
+
+ 
+```
 
 <center><span class="border-highlight"><b>Gráfico 2</center> </span></b>
 
 Historicamente há uma certa estabilidade em relação aos processos originários. Para os recursais, no entanto, há uma expressiva redução no acervo de magnitude de 70% em relação a 2016, e de 20% com relação a 2019.
 
 ```{r echo=FALSE, warning=FALSE}
-# Esboço
+# Esboço 
 
 dados <-
   structure(list(Ano = c("Anteriores a 2016", "2016 a 2017", "2018 a 2019", "2020"), 
 Processos = c(2772, 1309, 3780, 18395)), 
             class = "data.frame", row.names = c(NA, -4L))
-
 dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
-
 ggplot(dados, aes(x = Ano, y = Processos)) + 
   geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity",show.legend = FALSE) + 
   ggtitle("Acervo por ano de autuação") +
@@ -79,12 +129,9 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
              vjust = 0.5, size = 3.5, hjust = 0.5)+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
-  coord_flip() +
-        theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank(),
-        panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank())
+  coord_flip() 
+
+# Falta 2021
 
 ```
 
@@ -99,6 +146,33 @@ Com relação ao Ramo do Direito, a categoria Direito Administrativo e Outras Ma
 <center><span class="border-highlight"><b>Tabela 2</center> </span></b>
 
 Por fim, a tramitação por meio eletrônico corresponde a 96% do acervo de 2020, conforme gráfico a seguir.
+
+```{r echo=FALSE, warning=FALSE}
+
+library(ggrepel)
+
+graph_acervo <- data.frame(ano=tabela_acervo$ano,                          eletronico=tabela_acervo$eletronico*100,
+          fisico=tabela_acervo$fisico*100)
+
+ggplot(graph_acervo, aes(x = ano)) +
+geom_line(aes(y = eletronico), size = 0.5)+
+geom_point(aes(y = eletronico), size = 3, shape=18, color="red", linetype=4, stat = "identity") +
+  geom_text_repel(data = graph_acervo, aes(y = eletronico,label = paste0(eletronico, "%")))+
+# geom_text(aes(y = eletronico,label = paste0(eletronico, "%")),
+            #position = position_stack(vjust = 1.1))+
+geom_line(aes(y = fisico), size = 0.5)+
+geom_point(aes(y = fisico), stat = "identity",size = 3, color="blue")+
+#   geom_text(aes(y = fisico,label = paste0(fisico, "%")),
+        #    position = position_stack(vjust = 1))+
+  coord_cartesian(ylim = c(-30, 110))+
+  geom_text_repel(data = graph_acervo, aes(y = fisico,label = paste0(fisico, "%")))+
+labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight()
+
+# Não consegui colocar legenda físico/eletrônico
+```
+
 
 <center><span class="border-highlight"><b>Gráfico 4</center> </span></b>
 
