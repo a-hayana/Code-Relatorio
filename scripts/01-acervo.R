@@ -4,6 +4,7 @@
 # Carregando pacotes
 library(readxl)
 library(dplyr)
+library(tidyverse)
 
 # --------- Leitura dos dados históricos
 dados_historico <- read_excel("dados/relatorio_historico.xlsx")
@@ -23,11 +24,14 @@ acervo2021 |>
 
 # Separando variáveis desejadas
 acervo2021_sep <- acervo2021 |>
-  select(classe:meio_processo) |>
+  select(classe:data_autuacao, ramo_direito_novo) |>
   group_by(classe) |>
   mutate(tipo = ifelse(classe %in% c("ARE","RE", "AI"), "recursal", "originario"))
 
 options(tibble.print_max = 50)
+
+acervo_2021 <- saveRDS(acervo2021, file ="data_raw/tabela_acervo2021.rds")
+# não sei se é a mesma tabela de acervo
 
 # acervo2021_sep |>
 #   group_by(tipo,classe) |>
@@ -51,7 +55,74 @@ acervo2021_sep |>
 
 tabela_acervo <- rbind(dados_historico,tab1)
 
+# Acervo por ano de autuação
 
+autuacao_levels = c('Anterior a 2017', '2017 a 2018', '2019 a 2020', '2021')
+
+acervo2021_sep %>%
+  mutate(data_autuacao = lubridate::ymd(data_autuacao),
+         ano_autuacao = lubridate::year(data_autuacao),
+         clas_ano_autuacao =
+           case_when(
+             ano_autuacao == 2021 ~ '2021',
+             ano_autuacao == 2020 | ano_autuacao == 2019 ~ '2019 a 2020',
+             ano_autuacao == 2018 | ano_autuacao == 2017 ~ '2017 a 2018',
+             TRUE ~ 'Anterior a 2017'
+           ),
+         clas_ano_autuacao = factor(clas_ano_autuacao, levels = autuacao_levels)) |>
+  select(link, data_autuacao, ano_autuacao, clas_ano_autuacao) |>
+  group_by(clas_ano_autuacao) |>
+  summarise(n = n()) |>
+  ggplot2::ggplot(aes(y = clas_ano_autuacao, x = n)) +
+  geom_bar(stat = 'identity', with=0.5, fill="steelblue") +
+  geom_text(aes(label=n), vjust=0.2, hjust = +1.1, color="white", size=3.5)+
+  ggtitle("Acervo por ano de autuação") +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight() +
+  #coord_cartesian(ylim = c(0, 60000))+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+# Acervo por ramo do direito__________________________________
+
+acervo2021_sep |>
+  filter(!is.na(ramo_direito_novo)) |>
+  group_by(ramo_direito_novo) |>
+  summarise(n = n()) |>
+  #arrange(desc(n)) |>
+  group_by(ramo_direito_novo = forcats::fct_lump(ramo_direito_novo, n=14, w = n)) |>
+  summarise(n = sum(n)) |>
+  arrange(desc(n)) |>
+  mutate(ramo_direito_novo = ifelse(ramo_direito_novo == "Other", "DEMAIS RAMOS", as.character(ramo_direito_novo))) |>
+  forcats::fct_reorder(ramo_direito_novo, )
+
+
+acervo2021_sep |>
+  filter(!is.na(ramo_direito_novo)) |>
+  group_by(ramo_direito_novo) |>
+  summarise(n = n()) |>
+  #arrange(desc(n)) |>
+  group_by(ramo_direito_novo = forcats::fct_lump(ramo_direito_novo, n=14, w = n)) |>
+  summarise(n = sum(n)) |>
+  arrange(desc(n)) |>
+  mutate(ramo_direito_novo = ifelse(ramo_direito_novo == "Other", "DEMAIS RAMOS", as.character(ramo_direito_novo))) |>
+  mutate(ramo_direito_novo = fct_reorder(ramo_direito_novo, -n),
+         ramo_direito_novo = forcats::fct_relevel(ramo_direito_novo, "DEMAIS RAMOS", after = 14)) |>
+  arrange(ramo_direito_novo) |>
+  janitor::adorn_totals('row') |>
+  knitr::kable()
+
+
+# Apenas informar como nota de rodapé.
+acervo2021_sep |>
+  filter(is.na(ramo_direito_novo) | ramo_direito_novo == "NULL") |>
+  nrow()
+
+# Fonte: https://wilkelab.org/SDS375/slides/getting-things-in-order.html#61
+# Fonte2: https://r4ds.had.co.nz/factors.html
+# Fonte3: https://discourse.curso-r.com/t/categoria-outros-sendo-ultimo-nivel-de-um-fator/1161
 
 
 # Resumo ------------------------------------------------------------------

@@ -113,22 +113,35 @@ Historicamente há uma certa estabilidade em relação aos processos originário
 ```{r grafico3, echo=FALSE, warning=FALSE}
 # Esboço - Falta dados 2021 - Euler
 
-dados <-
-  structure(list(Ano = c("Anteriores a 2016", "2016 a 2017", "2018 a 2019", "2020"), 
-Processos = c(2772, 1309, 3780, 18395)), 
-            class = "data.frame", row.names = c(NA, -4L))
-dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
-ggplot(dados, aes(x = Ano, y = Processos)) + 
-  geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity",show.legend = FALSE) + 
-  ggtitle("Acervo por ano de autuação") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021.")+
-  geom_label(aes(label = Processos),
-             position = position_dodge(0.9), 
-             vjust = 0.5, size = 3.5, hjust = 0.5)+
-  scale_fill_brewer(palette = "Blues") +
-  ggthemes::theme_fivethirtyeight()+
-  coord_flip() 
+acervo2021_sep <- readRDS(file="../data_raw/tabela_acervo2021.rds")
 
+autuacao_levels = c('Anterior a 2017', '2017 a 2018', '2019 a 2020', '2021')
+
+acervo2021_sep %>%
+  mutate(data_autuacao = lubridate::ymd(data_autuacao),
+         ano_autuacao = lubridate::year(data_autuacao),
+         clas_ano_autuacao =
+           case_when(
+             ano_autuacao == 2021 ~ '2021',
+             ano_autuacao == 2020 | ano_autuacao == 2019 ~ '2019 a 2020',
+             ano_autuacao == 2018 | ano_autuacao == 2017 ~ '2017 a 2018',
+             TRUE ~ 'Anterior a 2017'
+           ),
+         clas_ano_autuacao = factor(clas_ano_autuacao, levels = autuacao_levels)) |>
+  select(link, data_autuacao, ano_autuacao, clas_ano_autuacao) |>
+  group_by(clas_ano_autuacao) |>
+  summarise(n = n()) |>
+  ggplot2::ggplot(aes(y = clas_ano_autuacao, x = n)) +
+  geom_bar(stat = 'identity', with=0.5, fill="steelblue") +
+  geom_text(aes(label=n), vjust=0.2, hjust = +1.1, color="white", size=3.5)+
+  ggtitle("Acervo por ano de autuação") +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight() +
+  #coord_cartesian(ylim = c(0, 60000))+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
 
 ```
 
@@ -140,7 +153,23 @@ Aproximadamente <mark>89%</mark> do acervo é composto por feitos autuados nos �
 
 Com relação ao Ramo do Direito, a categoria Direito Administrativo e Outras Matérias do Direito Público corresponde a mais de <mark>35%</mark> do total, seguida por Direito Processual Penal <mark>(15,69%) e Direito Tributário (10,96%)</mark>.
 
-<center><span class="border-highlight"><b>Tabela 2</center> </span></b>
+
+```{r tabela2, echo=FALSE, , warning=FALSE}
+acervo2021_sep |>
+  filter(!is.na(ramo_direito_novo)) |>
+  group_by(ramo_direito_novo) |>
+  summarise(n = n()) |>
+  #arrange(desc(n)) |>
+  group_by(ramo_direito_novo = forcats::fct_lump(ramo_direito_novo, n=14, w = n)) |>
+  summarise(n = sum(n)) |>
+  arrange(desc(n)) |>
+  mutate(ramo_direito_novo = ifelse(ramo_direito_novo == "Other", "DEMAIS RAMOS", as.character(ramo_direito_novo))) |>
+  mutate(ramo_direito_novo = fct_reorder(ramo_direito_novo, -n),
+         ramo_direito_novo = forcats::fct_relevel(ramo_direito_novo, "DEMAIS RAMOS", after = 14)) |>
+  arrange(ramo_direito_novo) |>
+  janitor::adorn_totals('row') |>
+  knitr::kable()
+```
 
 Por fim, a tramitação por meio eletrônico corresponde a 96% do acervo de 2020, conforme gráfico a seguir.
 
