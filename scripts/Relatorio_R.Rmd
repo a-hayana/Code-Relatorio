@@ -31,10 +31,12 @@ htmltools::img(src = knitr::image_uri(file.path("images", "logo.png")),
 knitr::opts_chunk$set(echo = TRUE, fig.align = "center")
 
 library(DT)
-library(ggplot2)
+library(tidyverse)
 library(scales)
-library(DT)
 library(patchwork)
+library(tidyr)
+library(ggrepel)
+library(janitor)
 ```
 
 # Resultados da Prestação Jurisdicional
@@ -43,7 +45,7 @@ library(patchwork)
 
 <br>
 
-Dos <mark>26.256</mark> processos em tramitação Dos processos recebidos, <mark>25.354 (33,74%)</mark> são originários e <mark>49.783 (66,26%)</mark> são recursais. Ainda sobre os processos recebidos, <mark>37.211 (50,8%)</mark> foram registrados à presidência, com média mensal de <mark>3.101</mark> processos e <mark>35.960 (49,2%)</mark> processos foram distribuídos aos ministros, com média mensal de <mark>2.997</mark> processos. Isto significa uma média mensal de <mark>297</mark> processos por mês por Ministro.
+Dos <mark>26.256</mark> processos em tramitação dos processos recebidos, <mark>25.354 (33,74%)</mark> são originários e <mark>49.783 (66,26%)</mark> são recursais. Ainda sobre os processos recebidos, <mark>37.211 (50,8%)</mark> foram registrados à presidência, com média mensal de <mark>3.101</mark> processos e <mark>35.960 (49,2%)</mark> processos foram distribuídos aos ministros, com média mensal de <mark>2.997</mark> processos. Isto significa uma média mensal de <mark>297</mark> processos por mês por Ministro.
 
 Em relação às decisões, contabilizou-se <mark>99.517</mark>, sendo <mark>81.309 (82%)</mark> monocráticas e <mark>18.208 (18%)</mark> colegiadas. O número de processos baixados <mark>(78.433) foi 4,3%</mark> maior do que o número de recebidos. <mark>Em relação ao ano anterior a redução foi de 16%</mark>.
 
@@ -59,11 +61,10 @@ tabela_acervo <- readRDS("../data_raw/tabela_acervo.rds")
 
 tabela_acervo  |>
   ggplot(aes(x = ano, y = acervo_total)) +
-  geom_text(aes(label = acervo_total),
+  geom_label(aes(label = acervo_total),
             position = position_stack(vjust = 1.1))+
   ggtitle("Acervo processual") +
-  geom_area(fill = 4,
-            alpha = 0.5)+
+  geom_area(fill = 4, color = 'grey', alpha = 0.5)+
   labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
@@ -72,108 +73,121 @@ tabela_acervo  |>
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
 
-
  
 ```
 
-<center><span class="border-highlight"><b>Gráfico 1</center> </span></b>
 
 Os gráficos abaixo mostram a evolução dos processos originários e recursais, desde 2016. Houve uma redução em 16% no acervo de 2019 para 2020.
 
 ```{r grafico2, echo=FALSE, warning=FALSE}
 
-# NÃO OK - Euler ajuda aqui!
+acervo_orig_rec <-
+tabela_acervo |> 
+  select(ano:recursal) |> 
+  pivot_longer(
+    cols = originario:recursal,
+    names_to = "classificacao",
+    values_to = "qtd"
+  )
 
-grupo <- as.factor(c(rep("originario", times=6), rep("recursal", times=6)))
 
-valores <- c(tabela_acervo$originario,tabela_acervo$recursal)
-
-ano  <- factor(tabela_acervo$ano, levels = unique(tabela_acervo$ano))
-df <- data.frame(ano,valores,grupo)
-
-df |>
-  ggplot(aes(x = ano, y = valores), fill=grupo) +
-  geom_text(aes(label = valores),
-            position = position_stack(vjust = 1.1))+
+acervo_orig_rec |> 
+  ggplot(aes(x = ano, y = qtd, 
+             fill= fct_reorder(classificacao, qtd, .desc = TRUE)), position = "identity")+
   ggtitle("Originários e recursais") +
-  geom_area(aes(fill = grupo)) +
+  geom_area(color = 'grey') +
   labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
   theme(axis.title.y=element_blank(),
         axis.text.y=element_blank(),
-        axis.ticks.y=element_blank())
+        legend.title = element_blank(),
+        axis.ticks.y=element_blank()) +
+  geom_text(aes(label = qtd),
+            position = position_stack(vjust = 1.1))
+
 
 ```
 
-<center><span class="border-highlight"><b>Gráfico 2</center> </span></b>
 
 Historicamente há uma certa estabilidade em relação aos processos originários. Para os recursais, no entanto, há uma expressiva redução no acervo de magnitude de 70% em relação a 2016, e de 20% com relação a 2019.
 
 ```{r grafico3, echo=FALSE, warning=FALSE}
-# Esboço - Falta dados 2021 - Euler
+# OK - 2021
 
-dados <-
-  structure(list(Ano = c("Anteriores a 2016", "2016 a 2017", "2018 a 2019", "2020"), 
-Processos = c(2772, 1309, 3780, 18395)), 
-            class = "data.frame", row.names = c(NA, -4L))
-dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
-ggplot(dados, aes(x = Ano, y = Processos)) + 
-  geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity",show.legend = FALSE) + 
+autuacao_levels = c('Anterior a 2017', '2017 a 2018', '2019 a 2020', '2021')
+
+acervo_autuacao <- readRDS("../data_raw/acervo_autuacao.rds")
+
+acervo_autuacao |> 
+  ggplot2::ggplot(aes(y = clas_ano_autuacao, x = n)) +
+  geom_bar(aes(fill = autuacao_levels), color = 'black', stat = "identity",show.legend = FALSE) +
+  geom_label(aes(label=n))+
   ggtitle("Acervo por ano de autuação") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021.")+
-  geom_label(aes(label = Processos),
-             position = position_dodge(0.9), 
-             vjust = 0.5, size = 3.5, hjust = 0.5)+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
   scale_fill_brewer(palette = "Blues") +
-  ggthemes::theme_fivethirtyeight()+
-  coord_flip() 
-
+  ggthemes::theme_fivethirtyeight() +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
 
 ```
-
-
-<center><span class="border-highlight"><b>Gráfico 3</center> </span></b>
 
 Mais de <mark>70%</mark> dos processos do acervo têm menos de 1 ano de autuação.
 Aproximadamente <mark>89%</mark> do acervo é composto por feitos autuados nos últimos 5 anos. Estes resultados demonstram o compromisso do STF com a redução do acervo de processos antigos e o alcance da meta do Indicador de Processos Antigos.
 
 Com relação ao Ramo do Direito, a categoria Direito Administrativo e Outras Matérias do Direito Público corresponde a mais de <mark>35%</mark> do total, seguida por Direito Processual Penal <mark>(15,69%) e Direito Tributário (10,96%)</mark>.
 
-<center><span class="border-highlight"><b>Tabela 2</center> </span></b>
+```{r tabela2, echo=FALSE, warning=FALSE}
+
+# Dados RDS
+ramo_direito <- readRDS("../data_raw/ramo_direito.rds")
+
+# Organizando nome da coluna
+colnames(ramo_direito) <- c("Ramo do direito", "Quantidade de processos", "% do total")
+
+    DT::datatable(
+  ramo_direito, extensions = 'Buttons', options = list(
+    dom = 'Bfrtip',
+    buttons = c('copy', 'csv', 'excel', 'pdf', 'print','colvis'), pageLength = 16
+  )
+)
+
+```
 
 Por fim, a tramitação por meio eletrônico corresponde a 96% do acervo de 2020, conforme gráfico a seguir.
 
 ```{r grafico4, echo=FALSE, , warning=FALSE}
-# Não consegui colocar legenda físico/eletrônico
-# Ajuda Euler
+# OK - 2021
 
-library(ggrepel)
+acervo_eletro_fis <-
+tabela_acervo |> 
+  select(ano, eletronico:fisico) |> 
+  pivot_longer(
+    cols = eletronico:fisico,
+    names_to = "tipo",
+    values_to = "qtd"
+  )
 
-graph_acervo <- data.frame(ano=tabela_acervo$ano,                          eletronico=tabela_acervo$eletronico*100,
-          fisico=tabela_acervo$fisico*100)
 
-ggplot(graph_acervo, aes(x = ano)) +
-geom_line(aes(y = eletronico), size = 0.5)+
-geom_point(aes(y = eletronico), size = 3, shape=18, color="red", linetype=4, stat = "identity") +
-  geom_text_repel(data = graph_acervo, aes(y = eletronico,label = paste0(eletronico, "%")))+
-# geom_text(aes(y = eletronico,label = paste0(eletronico, "%")),
-            #position = position_stack(vjust = 1.1))+
-geom_line(aes(y = fisico), size = 0.5)+
-geom_point(aes(y = fisico), stat = "identity",size = 3, color="blue")+
-#   geom_text(aes(y = fisico,label = paste0(fisico, "%")),
-        #    position = position_stack(vjust = 1))+
-  coord_cartesian(ylim = c(-30, 110))+
-  geom_text_repel(data = graph_acervo, aes(y = fisico,label = paste0(fisico, "%")))+
-labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+acervo_eletro_fis |> 
+  ggplot(aes(x = ano, y = qtd, group=factor(tipo))) +
+  geom_point() + 
+  geom_line(aes(y = qtd, shape=tipo, fill = factor(tipo), colour=tipo)) +
+  geom_label(aes(label = paste0(round(qtd,3)*100,"%"))) +
+  ggtitle("Acervo Físico x Eletrônico") +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  coord_cartesian(ylim = c(-0.2, 1.2))+
   scale_fill_brewer(palette = "Blues") +
-  ggthemes::theme_fivethirtyeight()
+  ggthemes::theme_fivethirtyeight()+
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.title = element_blank(),
+        axis.ticks.y=element_blank())
 
 
 ```
 
-
-<center><span class="border-highlight"><b>Gráfico 4</center> </span></b>
 
 Desde 2013 a tramitação eletrônica supera a física. O esforço para a digitalização do acervo, uma das diretrizes estratégicas da corte, decorre da implantação de novas tecnologias e sistemas de automação. <mark>Em relação a 2019 houve diminuição de mais 2% dos processos físicos, resultado que corrobora a visão da Gestão de um STF 100% Digital.</mark>
 
@@ -181,7 +195,13 @@ Desde 2013 a tramitação eletrônica supera a física. O esforço para a digita
 
 De modo geral, o fluxo de tramitação processual no STF ocorre nas macro etapas a seguir apresentadas
 
-<center><span class="border-highlight"><b>Imagem</center> </span></b>
+<center>
+
+![](images/imagem1.png)
+
+</center>
+
+
 
 O processamento começa com o recebimento, autuação e análise inicial do processo pela SEJ. Consideram-se recebidos os processos ajuizados diretamente no STF, denominados "Originários" e os provenientes de outros juízos ou tribunais, chamados de "Recursais".
 
@@ -218,28 +238,79 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
 
 ```
 
-<center><span class="border-highlight"><b>Gráfico 5 </center> </span></b>
 
 Uma vez recebidos, os processos são autuados pela SEJ, com posterior registro à Presidência ou distribuição aos Ministros. <mark>51%</mark> dos processos recebidos foram registrados à Presidência. A ampliação da atuação da presidência pode ser observada nos gráficos a seguir, que mostram o percentual e a quantidade de registros, respectivamente:
 
 ```{r grafico6, echo=FALSE, warning=FALSE}
+# OK - 2021
+tab_percent_total <- readRDS("../data_raw/tabela_perc_total.rds")
 
-# FALTANDO!
+colnames(tab_percent_total)[2] <- "Registrados à Presidência"
+colnames(tab_percent_total)[3] <- "Distribuídos aos Ministros"
+
+percent_total <-
+tab_percent_total |> 
+  select(ano, 2:3) |> 
+  pivot_longer(
+    cols = 2:3,
+    names_to = "destino",
+    values_to = "qtd"
+  )
+
+
+percent_total |> 
+  ggplot(aes(x = ano, y = qtd, group=factor(destino))) +
+  geom_point() + 
+  geom_line(aes(y = qtd, shape=destino, fill = factor(destino), colour=destino)) +
+  geom_label_repel(aes(label = paste0(round(qtd,3),"%")), vjust = 0.5, hjust = 0.2) +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.") +
+  coord_cartesian(ylim = c(25, 73))+
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight() +
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.title = element_blank(),
+        axis.ticks.y=element_blank()
+       )
+
 
 ```
 
-<center><span class="border-highlight"><b>Gráfico 6 </center> </span></b>
+```{r grafico7, echo=FALSE, warning=FALSE}
+# OK - 2021
+qtd_total_pres_min <- readRDS("../data_raw/qtd_total_pres_min.rds")
 
-```{r grafico7, echo=FALSE, warning=TRUE}
+colnames(qtd_total_pres_min)[2] <- "Registrados à Presidência"
+colnames(qtd_total_pres_min)[3] <- "Distribuídos aos Ministros"
 
-# FALTANDO!
+qtd_total <-
+qtd_total_pres_min |> 
+  select(ano, 2:3) |> 
+  pivot_longer(
+    cols = 2:3,
+    names_to = "destino",
+    values_to = "qtd"
+  )
+
+
+qtd_total |> 
+  ggplot(aes(x = ano, y = qtd, group=factor(destino))) +
+  geom_point() + 
+  geom_line(aes(y = qtd, shape=destino, fill = factor(destino), colour=destino)) +
+  geom_label_repel(aes(label = qtd), hjust = 0.5, size = 3) +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.") +
+   scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight() +
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.title = element_blank(),
+        axis.ticks.y=element_blank()
+       )
 
 ```
 
-<center><span class="border-highlight"><b>Gráfico 7 </center> </span></b>
 
-A soma dos processos distribuídos aos ministros e registrados à presidência não coincide com o total de processos recebidos. Essa diferença corresponde às seguintes situações: (a) processos recebidos mas ainda não distribuídos ou registrados; (b) retificações de autuações (processos repetidos --- duplicados, triplicados etc. ---, cujas cópias são baixadas à origem); e (c) inconformidades para tramitação (por
-exemplo: processos indevidamente remetidos ao STF, processos sem peças suficientes para a autuação ou remetidos mais de uma vez ao Tribunal).
+A soma dos processos distribuídos aos ministros e registrados à presidência não coincide com o total de processos recebidos. Essa diferença corresponde às seguintes situações: (a) processos recebidos mas ainda não distribuídos ou registrados; (b) retificações de autuações (processos repetidos --- duplicados, triplicados etc. ---, cujas cópias são baixadas à origem); e (c) inconformidades para tramitação (por exemplo: processos indevidamente remetidos ao STF, processos sem peças suficientes para a autuação ou remetidos mais de uma vez ao Tribunal).
 
 ### Recebimento de Recursos
 
@@ -252,19 +323,76 @@ Obs: Neste ponto, fazer um infográfico como o da página 31 do Relatório de At
 Os dois gráficos a seguir mostram, respectivamente, os percentuais e quantidades de recursos registrados à presidência e distribuídos aos ministros.
 
 
-```{r grafico8, echo=FALSE, warning=TRUE}
+```{r grafico8, echo=FALSE, warning=FALSE}
+# OK - 2021
 
-# FALTANDO!
+qtd_recursal_pres_min <- readRDS("../data_raw/qtd_recursal_pres_min.rds")
+
+colnames(qtd_recursal_pres_min)[2] <- "Registrados à Presidência"
+colnames(qtd_recursal_pres_min)[3] <- "Distribuídos aos Ministros"
+
+recursal_pres_min <-
+qtd_recursal_pres_min |> 
+  select(ano, 2:3) |> 
+  pivot_longer(
+    cols = 2:3,
+    names_to = "destino",
+    values_to = "qtd"
+  )
+
+
+recursal_pres_min |> 
+  ggplot(aes(x = ano, y = qtd, group=factor(destino))) +
+  geom_point() + 
+  geom_line(aes(y = qtd, shape=destino, fill = factor(destino), colour=destino)) +
+  geom_label(aes(label = paste0(round(qtd,3),"%"))) +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.") +
+ # coord_cartesian(ylim = c(25, 73))+
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight() +
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.title = element_blank(),
+        axis.ticks.y=element_blank()
+       )
+
 
 ```
-<center><span class="border-highlight"><b>Gráfico 8 </center> </span></b>
 
-```{r grafico9, echo=FALSE, warning=TRUE}
 
-# FALTANDO!
+```{r grafico9, echo=FALSE, warning=FALSE}
+# OK - 2021
+qtd_recursal_pres_min_2 <- readRDS("../data_raw/qtd_recursal_pres_min_2.rds")
+
+colnames(qtd_recursal_pres_min_2)[2] <- "Registrados à Presidência"
+colnames(qtd_recursal_pres_min_2)[3] <- "Distribuídos aos Ministros"
+
+qtd_recur_pres_min <-
+qtd_recursal_pres_min_2 |> 
+  select(ano, 2:3) |> 
+  pivot_longer(
+    cols = 2:3,
+    names_to = "destino",
+    values_to = "qtd"
+  )
+
+
+qtd_recur_pres_min |> 
+  ggplot(aes(x = ano, y = qtd, group=factor(destino))) +
+  geom_point() + 
+  geom_line(aes(y = qtd, shape=destino, fill = factor(destino), colour=destino)) +
+  geom_label_repel(aes(label = qtd), vjust = 0.5, size = 3) +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.") +
+   scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight() +
+    theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.title = element_blank(),
+        axis.ticks.y=element_blank()
+       )
 
 ```
-<center><span class="border-highlight"><b>Gráfico 9 </center> </span></b>
+
 
 Este significativo avanço da atuação da Presidência na esfera recursal é resultado da implementação do projeto estratégico Juízo de Admissibilidade, que ampliou a atuação do Núcleo de Análise de Recursos (NARE) e do Núcleo de Repercussão Geral (NURG), no âmbito da Presidência, e de setores especializados na SEJ. Essas unidades são responsáveis pela apreciação de recursos manifestamente inadmissíveis ou inaptos, bem como pela aplicação da sistemática da repercussão geral.
 
@@ -274,21 +402,66 @@ ao STF.
 Os dois gráficos a seguir mostram a evolução dos processos recebidos em classes recursais apenas para o ano de 2020. Desse total, foram
 registrados à Presidência por mês <mark>3.101 processos</mark>, em média. Foram distribuídos aos Ministros 2.930 processos por mês, em média, no mesmo período.
 
-```{r grafico10, echo=FALSE, warning=TRUE}
+```{r grafico10, echo=FALSE, warning=FALSE}
+# OK - 2021
 
-# FALTANDO!
+receb_rec <- readRDS("../data_raw/tabela_rec_total.rds")
+
+recebidos_recursais <- 
+receb_rec |> 
+  select(ano,ARE:RE) |> 
+  pivot_longer(
+    cols = ARE:RE,
+    names_to = "recursais",
+    values_to = "qtd"
+  )
+
+
+recebidos_recursais |> 
+  ggplot(aes(x = ano, y = qtd, 
+             fill= fct_reorder(recursais, qtd, .desc = TRUE)), position = "identity")+
+  ggtitle("Recebidos - ARE, AI e RE") +
+  geom_area(color = 'grey') +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.title = element_blank(),
+        axis.ticks.y=element_blank()) +
+    geom_text(aes(label = qtd),position = position_stack(vjust = 1.1), size=3)
 
 ```
-<center><span class="border-highlight"><b>Gráfico 10 </center> </span></b>
 
 
 ```{r grafico11, echo=FALSE, warning=TRUE}
+# OK - 2021
 
-# FALTANDO!
+df_classes <- readRDS("../data_raw/df_classes.rds")
+
+dados <- data.frame(Processos = factor(df_classes$class_names), 
+                       Proporção = df_classes$total_perc)
+
+dados <- dados %>% 
+  mutate(Ano = "2021")
+
+ggplot(dados, aes(x = Ano, y = Proporção, fill = Processos)) +
+  geom_col() +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  geom_text(aes(label = paste0(Proporção, "%")),
+            position = position_stack(vjust = 0.5)) +
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight()+
+  theme(legend.title = element_blank(),
+        axis.ticks.y=element_blank())+
+  coord_flip()+
+  xlab(NULL)+
+  ylab("2021")
+
+
 
 ```
 
-<center><span class="border-highlight"><b>Gráfico 11 </center> </span></b>
 
 Redução percentual de <b>23%</b> de recebimentos de ARE em relação a 2019 <mark>e redução percentual de aproximadamente 25% de recebimento de RE.</mark>
 
@@ -339,17 +512,35 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
 
 ```
 
-<center><span class="border-highlight"><b>Gráfico 13 </center> </span></b>
 
 Para o ano de 2020, temos, em bases percentuais:
 
-```{r grafico14, warning=TRUE}
+```{r grafico14, echo=FALSE, warning=FALSE}
+# OK - 2021
+grafico_classes <- readRDS("../data_raw/grafico_classes.rds")
 
-# PENDENTE!
-# Anual - Euler
+dados <- data.frame(Processos = factor(grafico_classes$grupo_de_classe), 
+                       Proporção = grafico_classes$percent_classes)
+
+dados <- dados %>% 
+  mutate(Ano = "2021")
+
+ggplot(dados, aes(x = Ano, y = Proporção, fill = Processos)) +
+  geom_col() +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  geom_text(aes(label = paste0(Proporção, "%")),
+            position = position_stack(vjust = 0.5)) +
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight()+
+  theme(legend.title = element_blank(),
+        axis.ticks.y=element_blank())+
+  coord_flip()+
+  xlab(NULL)+
+  ylab("2021")
+
+
 ```
 
-<center><span class="border-highlight"><b>Gráfico 14 </center> </span></b>
 
 A tabela a seguir mostra o recebimento de processos originários por classe:
 
@@ -369,7 +560,6 @@ colnames(tab_total_class) <- c("Classe originária", "Grupo","2016","2017","2018
 )
 
 ```
-<center><span class="border-highlight"><b>Tabela 4 </center> </span></b>
 
 <mark>Houve aumento de mais de 50% de processos de Controle Concentrado, com destaque para as classes ADI (+46%) e ADPF (+64%). Além disso, houve expressivo aumento de HC, com aumento de 21% no recebimento de processos. Estes aumentos podem estar relacionados com contexto da pandemia COVID-19.</mark> Além disso, mais de <mark>90%</mark> dos processos pertencem às classes Habeas Corpus, Reclamação e Recurso em Habeas Corpus.
 
@@ -406,7 +596,6 @@ colnames(tabela_dec_especies_2021)[1] <- "Decisões por espécie"
 
 ```
 
-<center><span class="border-highlight"><b>Tabela 5 </center> </span></b>
 
 Ademais, as decisões podem ser classificadas em monocráticas <mark>(82%)</mark> e colegiadas<mark>(18%)</mark>. Entre as monocráticas, <mark>56%</mark> foram decisões proferidas por Ministros e <mark>44%</mark> pelo Ministro Presidente. Entre as decisões colegiadas, cerca de <mark>68%</mark> foram proferidas pelas turmas e <mark>32%</mark> pelo Plenário. <mark>Houve um aumento de 2% nas decisões colegiadas, reforçando o princípio da Colegialidade.</mark> Os gráficos a seguir mostram o quantitativo de decisões monocráticas e colegiadas por ano.
 
@@ -440,7 +629,6 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
 
 ```
 
-<center><span class="border-highlight"><b>Gráfico 16 </center> </span></b>
 
 ```{r grafico17, echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
 # 2021 - OK
@@ -471,7 +659,6 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
 
 ```
 
-<center><span class="border-highlight"><b>Gráfico 17 </center> </span></b>
 
 A tabela a seguir mostra o quantitativo de decisões por órgão julgador:
 
@@ -492,7 +679,6 @@ colnames(tabela_final_orgao)[1] <- "Decisões por Órgão Julgador"
 
 ```
 
-<center><span class="border-highlight"><b>Tabela 6 </center> </span></b>
 
 Os números constantes da tabela a seguir demonstram a importância da alteração regimental proposta pela resolução 642/2019 no STF para o reforço da colegialidade. Tratam-se dos quantitativos de decisões do Plenário.
 
@@ -512,7 +698,6 @@ colnames(tabela_final_plen)[1] <- "Decisões do Plenário por Classe"
 )
 
 ```
-<center><span class="border-highlight"><b>Tabela 7 </center> </span></b>
 
 Os números constantes da tabela a seguir demonstram a importância da adoção no STF da gestão estratégica focada na implementação de sua transformação digital como instrumento indispensável à entrega de uma prestação jurisdicional mais célere e efetiva para a sociedade.
 
@@ -552,7 +737,6 @@ tx_recorr |>
 
 ```
 
-<center><span class="border-highlight"><b>Gráfico 18 </center> </span></b>
 
 A taxa de recorribilidade geral é de <mark>20%</mark>. Entre os processos originários, a taxa de recorribilidade é de <mark>21%</mark> e entre os processos recursais, <mark>19%</mark>.
 
@@ -566,7 +750,7 @@ A taxa de produtividade é a divisão da quantidade de processos baixados pela q
 tabela_rec_baixa_total <- readRDS("../data_raw/tabela_rec_baixa_total.rds")
 
 # Organizando nome da coluna
-colnames(tabela_rec_baixa_total) <- c("Produtividade","Recebimento","Baixa","Taxa de produtividade", "Acervo Final")
+colnames(tabela_rec_baixa_total) <- c("Ano","Recebimento","Baixa","Taxa de produtividade", "Acervo Final")
 
   DT::datatable(
   tabela_rec_baixa_total, extensions = 'Buttons', options = list(
@@ -576,17 +760,48 @@ colnames(tabela_rec_baixa_total) <- c("Produtividade","Recebimento","Baixa","Tax
 )
 
 ```
-<center><span class="border-highlight"><b>Tabela 9 </center> </span></b>
+
 
 A taxa de produtividade foi de <mark>104,4%</mark>. O acervo final de 2020, observado em 31/12/2020, foi cerca de <mark>16%</mark> menor do que o acervo final de 2019.
 Esse resultado demonstra o esforço do STF em tornar o processo de julgamento mais célere. Por fim, o gráfico a seguir mostra a quantidade de processos baixados, recebidos e o acervo final por ano.
 
-```{r grafico19}
+```{r grafico19, echo=FALSE, warning=FALSE}
+# OK - 2021
 
-# PENDENTE!
+# Selecionando variáveis
+grafico_receb_baixa <-
+  tabela_rec_baixa_total |>
+  select(1:3, 5)
+
+receb_baixa <-
+  grafico_receb_baixa |>
+  select(1:4) |>
+  tidyr::pivot_longer(cols = (2:4),
+                      names_to = "destino",
+                      values_to = "qtd") |>
+  mutate(qtd = as.numeric(qtd))
+
+receb_baixa |>
+  ggplot(aes(
+    x = Ano,
+    y = qtd,
+    group = destino,
+    shape = destino
+  )) +
+  geom_line(aes(colour = destino)) +
+  geom_label(aes(label = qtd), size = 3) +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.") +
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight() +
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    legend.title = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+
+
 ```
-
-<center><span class="border-highlight"><b>Gráfico 19 </center> </span></b>
 
 # Relatório da Repercussão Geral
 

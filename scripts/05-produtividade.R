@@ -23,8 +23,9 @@ temas_julg_hist <- produtiv_hist |>
 
 # Tabela 2021 -------------------------------------------------------------
 
-# PENDENTE!
+
 # RECEBIDOS/BAIXA -> Ver aba "02_1-recebidos"
 
 
+# PENDENTE!
 # Falta:RG RECONHECIDA / RG NEGADA / MERITO JULGADO / REAF. JURIS

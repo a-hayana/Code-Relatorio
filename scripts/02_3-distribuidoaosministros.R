@@ -33,23 +33,23 @@ dist_min_orig <- sep_subgrupo |>
 
 
 # Percentagem - Recursal (Presidente + Ministros)
-perc_presid_recur_2021 <- paste0(round(reg_presid_recursal$n/
-                                         (reg_presid_recursal$n+dist_min_recursal$n),4)*100,"%")
+perc_presid_recur_2021 <- round(reg_presid_recursal$n/
+                                         (reg_presid_recursal$n+dist_min_recursal$n),2)*100
 
 
-perc_min_recur_2021 <- paste0(round(dist_min_recursal$n/
-                                      (dist_min_recursal$n+reg_presid_recursal$n),4)*100,"%")
+perc_min_recur_2021 <- round(dist_min_recursal$n/
+                                      (dist_min_recursal$n+reg_presid_recursal$n),2)*100
 
 
 # Percentagem - Distribuídos geral
 
 # % Presidência
-perc_geral_presid <- paste0(round(reg_presid$n/
-                                    (reg_presid$n+dist_min_total$n),4)*100,"%")
+perc_geral_presid <- round(reg_presid$n/
+                                    (reg_presid$n+dist_min_total$n),2)*100
 
 # % Ministros
-perc_geral_min <- paste0(round(dist_min_total$n/
-                                 (dist_min_total$n+reg_presid$n),4)*100,"%")
+perc_geral_min <- round(dist_min_total$n/
+                                 (dist_min_total$n+reg_presid$n),2)*100
 
 
 # Juntando tabela histórica + dados 2021 - Presidência
@@ -57,7 +57,7 @@ perc_geral_min <- paste0(round(dist_min_total$n/
 # Tabela 2020 - Registrados à Presidência
 hist_presid <- dados_historico |>
   select(ano,reg_presid_orig:reg_presid_total) |>
-  mutate(perc_presid_recur = paste0(round(perc_presid_recur,4)*100,"%"))
+  mutate(perc_presid_recur = round(perc_presid_recur,2)*100)
 
 # Construindo tabela 2021
 pres_orig <- reg_presid_originario$n
@@ -79,7 +79,7 @@ tabela_rec_pres_total <- rbind(hist_presid,tab_pres_rec_final)
 # Tabela 2020 - Distribuídos aos ministros
 hist_min <- dados_historico |>
   select(ano,dist_min_orig:dist_min_total) |>
-  mutate(perc_min_recur = paste0(round(perc_min_recur,4)*100,"%"))
+  mutate(perc_min_recur = round(perc_min_recur,2)*100)
 
 # Construindo tabela 2021
 min_orig <- dist_min_recursal$n
@@ -98,8 +98,8 @@ tabela_rec_min_total <- rbind(hist_min,tab_min_rec_final)
 # Tabela histórica - Percentagens
 hist_percent_geral <- dados_historico |>
   select(ano,percent_presid:percent_dist) |>
-  mutate(percent_presid = paste0(round(percent_presid,4)*100,"%"),
-         percent_dist = paste0(round(percent_dist,4)*100,"%"))
+  mutate(percent_presid = round(percent_presid,2)*100,
+         percent_dist = round(percent_dist,2)*100)
 
 
 # Construindo tabela 2021
@@ -116,16 +116,16 @@ tabela_perc_total <- rbind(hist_percent_geral,tab_percent_geral)
 
 # Tabela 13: Processos Registrados à Presidência e Distribuídos aos Ministros --------
 View(tabela_perc_total)
-# saveRDS(tabela_perc_total, "tabela_perc_total.rds")
+#saveRDS(tabela_perc_total, "tabela_perc_total.rds")
 
 # Tabela 14: Processos Distribuídos aos Ministros - Quantidade -------------
 # Tabela 15: Percentual de Recursos Distribuídos aos Ministros ------------
 # Tabela 16: Quantidade de Recursos  Distribuídos aos Ministros -----------
 View(tabela_rec_min_total)
-# saveRDS(tabela_rec_min_total, "tabela_rec_min_total.rds")
+#saveRDS(tabela_rec_min_total, "tabela_rec_min_total.rds")
 
 # Tabela 14: Processos Registrados à Presidência - Quantidade -------------
 # Tabela 15: Percentual de Recursos registrados à Presidência -------------
 # Tabela 16: Quantidade de Recursos registrados à Presidência -------------
 View(tabela_rec_pres_total)
-# saveRDS(tabela_rec_pres_total, "tabela_rec_pres_total.rds")
+#saveRDS(tabela_rec_pres_total, "tabela_rec_pres_total.rds")
