@@ -79,7 +79,7 @@ tabela_rec_pres_total <- rbind(hist_presid,tab_pres_rec_final)
 # Tabela 2020 - Distribuídos aos ministros
 hist_min <- dados_historico |>
   select(ano,dist_min_orig:dist_min_total) |>
-  mutate(perc_min_recur = round(perc_min_recur,2)*100)
+  mutate(perc_min_recur = round(perc_min_recur,3)*100)
 
 # Construindo tabela 2021
 min_orig <- dist_min_recursal$n
@@ -98,8 +98,8 @@ tabela_rec_min_total <- rbind(hist_min,tab_min_rec_final)
 # Tabela histórica - Percentagens
 hist_percent_geral <- dados_historico |>
   select(ano,percent_presid:percent_dist) |>
-  mutate(percent_presid = round(percent_presid,2)*100,
-         percent_dist = round(percent_dist,2)*100)
+  mutate(percent_presid = round(percent_presid,3)*100,
+         percent_dist = round(percent_dist,3)*100)
 
 
 # Construindo tabela 2021
@@ -112,20 +112,32 @@ tab_percent_geral <- c(ano,percent_presid,percent_min
 )
 tabela_perc_total <- rbind(hist_percent_geral,tab_percent_geral)
 
+
+
+# Tabela para texto introdutório ------------------------------------------
+
+tabela_text_total <- cbind(tabela_perc_total,
+                           "dist_min_total" = tabela_rec_min_total$dist_min_total,
+                           "reg_presid_total" =tabela_rec_pres_total$reg_presid_total)
+
+# saveRDS(tabela_text_total, file = "data_raw/tabela_text_total.rds")
+
 # Resumo --------------------------------------------------------
 
 # Tabela 13: Processos Registrados à Presidência e Distribuídos aos Ministros --------
 View(tabela_perc_total)
-#saveRDS(tabela_perc_total, "tabela_perc_total.rds")
+#saveRDS(tabela_perc_total, file = "data_raw/tabela_perc_total.rds")
 
 # Tabela 14: Processos Distribuídos aos Ministros - Quantidade -------------
 # Tabela 15: Percentual de Recursos Distribuídos aos Ministros ------------
 # Tabela 16: Quantidade de Recursos  Distribuídos aos Ministros -----------
 View(tabela_rec_min_total)
-#saveRDS(tabela_rec_min_total, "tabela_rec_min_total.rds")
+#saveRDS(tabela_rec_min_total, file = "data_raw/tabela_rec_min_total.rds")
 
 # Tabela 14: Processos Registrados à Presidência - Quantidade -------------
 # Tabela 15: Percentual de Recursos registrados à Presidência -------------
 # Tabela 16: Quantidade de Recursos registrados à Presidência -------------
 View(tabela_rec_pres_total)
-#saveRDS(tabela_rec_pres_total, "tabela_rec_pres_total.rds")
+#saveRDS(tabela_rec_pres_total, file = "data_raw/tabela_rec_pres_total.rds")
+
+

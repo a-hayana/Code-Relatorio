@@ -5,6 +5,7 @@
 library(readxl)
 library(dplyr)
 library(lubridate)
+library(tidyverse)
 
 # --------- Leitura dos dados históricos
 dados_historico <- read_excel("dados/relatorio_historico.xlsx")

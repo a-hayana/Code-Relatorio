@@ -41,23 +41,230 @@ library(janitor)
 
 # Resultados da Prestação Jurisdicional
 
-<center> <span class="border-highlight"><b>Tabela 1</center> </span></b>
-
 <br>
 
-Dos <mark>26.256</mark> processos em tramitação dos processos recebidos, <mark>25.354 (33,74%)</mark> são originários e <mark>49.783 (66,26%)</mark> são recursais. Ainda sobre os processos recebidos, <mark>37.211 (50,8%)</mark> foram registrados à presidência, com média mensal de <mark>3.101</mark> processos e <mark>35.960 (49,2%)</mark> processos foram distribuídos aos ministros, com média mensal de <mark>2.997</mark> processos. Isto significa uma média mensal de <mark>297</mark> processos por mês por Ministro.
+```{r text, warning=TRUE, include=FALSE}
+# Inserir periodo da análise
+ano_atual <- 2021
+ano_anterior <- ano_atual-1
+# inserir parcial 
+data_tramitacao <- "01/01/2021"
 
-Em relação às decisões, contabilizou-se <mark>99.517</mark>, sendo <mark>81.309 (82%)</mark> monocráticas e <mark>18.208 (18%)</mark> colegiadas. O número de processos baixados <mark>(78.433) foi 4,3%</mark> maior do que o número de recebidos. <mark>Em relação ao ano anterior a redução foi de 16%</mark>.
+# Leitura RDS -------------------------------------------------
+
+tabela_acervo <- readRDS("../data_raw/tabela_acervo.rds")
+tabela_rec_total <- readRDS("../data_raw/tabela_rec_total.rds")
+tabela_perc_total <- readRDS("../data_raw/tabela_perc_total.rds")
+tabela_text_total <- readRDS("../data_raw/tabela_text_total.rds")
+tabela_dec <- readRDS("../data_raw/tabela_dec.rds")
+tabela_rec_baixa_total<- readRDS("../data_raw/tabela_rec_baixa_total.rds")
+ramo_direito <- readRDS("../data_raw/ramo_direito.rds")
+df_classes <- readRDS("../data_raw/df_classes.rds")
+qtd_recursal_pres_min_2 <- readRDS("../data_raw/qtd_recursal_pres_min_2.rds")
+prov_geral <- readRDS("../data_raw/prov_geral.rds")
+
+# Manipulações - texto ----------------------------------------
+
+# Acervo - Selecionando as variáveis desejadas
+text_acervo_2021 <- tabela_acervo |> 
+  select(ano:acervo_total) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(perc_orig = paste0(round((originario/acervo_total*100),2),"%")) |>  
+  mutate(perc_rec = paste0(round((recursal/acervo_total)*100,2), "%")) |> 
+  mutate(eletronico = paste0(round((eletronico*100),2),"%"),
+         fisico = paste0(round((fisico*100),2),"%")) # |> 
+  # as.character()
+
+# Redução/Aumento do acervo desde 2016
+num_acervo <- round(((text_acervo_2021[6]-tabela_acervo$acervo_total[1])/tabela_acervo$acervo_total[1])*100,0)
+
+
+# Diferença do acervo em comparação ao ano anterior
+num_acervo2 <- tabela_acervo |> 
+  select(ano:acervo_total) |> 
+  filter(ano %in% c(ano_atual,ano_anterior))
+
+text_num_acervo2 <- round(((num_acervo2$acervo_total[2]-num_acervo2$acervo_total[1])/num_acervo2$acervo_total[1])*100,0)
+
+# Diferença recursal em comparação ao ano anterior
+num_acervo3 <- round(((num_acervo2$recursal[2]-num_acervo2$recursal[1])/num_acervo2$recursal[1])*100,0)
+
+# Redução/Aumento do recursal (acervo) desde 2016
+num_acervo4 <- round(((text_acervo_2021[3]-tabela_acervo$recursal[1])/tabela_acervo$recursal[1])*100,0)
+
+
+# Diferença fisico em comparação ao ano anterior
+num_acervo5 <- round((num_acervo2$fisico[1]-num_acervo2$fisico[2])*100,4)
+
+
+
+# Textual - Acervo
+text_a1 <- num_acervo |> 
+  mutate(acervo_total2 = if_else(acervo_total < 0, "uma redução de aproximadamente" , "um aumento de aproximadamente")) |> 
+  mutate(paste0(acervo_total2, " ",abs(acervo_total), "%"))
+
+text_a2 <- num_acervo2 |> 
+  select(ano:acervo_total) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(acervo_total3 = if_else(text_num_acervo2 < 0, "uma redução em" , "um aumento de")) |> 
+  mutate(paste0(acervo_total3, " ", abs(text_num_acervo2), "%")) 
+
+text_a3 <- tabela_acervo |> 
+  select(ano,recursal) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(acervo_rec4 = if_else(num_acervo4 < 0, "uma redução em" , "um aumento de")) |> 
+  mutate(paste0(acervo_rec4, " ", abs(num_acervo4), "%"))
+
+
+# Recebidos  - Selecionando as variáveis desejadas
+text_recebidos_2021 <- tabela_rec_total |> 
+  select(ano:RE) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(perc_orig = paste0(round((originario/recebidos*100),2),"%")) |>  
+  mutate(perc_rec = paste0(round((recursal/recebidos)*100,2), "%"))  
+
+# Presid. e ministros  - Selecionando as variáveis desejadas
+text_pres_min_2021 <- tabela_text_total |> 
+  select(ano:reg_presid_total) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(percent_presid = paste0(percent_presid,"%")) |>  
+  mutate(percent_dist = paste0(percent_dist,"%"))
+
+# Presid. e ministros - Recursal apenas
+qtd_2_rec <- qtd_recursal_pres_min_2 |> 
+  select(ano:dist_min_recursal) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(mes_presid = round(reg_presid_recur/12,0),
+         mes_min = round(dist_min_recursal/12,0))
+
+
+# Decisões - Selecionando as variáveis desejadas
+decisoes <- tabela_dec |> 
+  select(ano:decisoes_colegiadas) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(perc_mono = paste0(round((decisoes_monocraticas/total_decisoes*100),2),"%")) |>  
+  mutate(perc_col = paste0(round((decisoes_colegiadas/total_decisoes)*100,2), "%")) # |> 
+  # as.character()
+
+# Baixa - Selecionando as variáveis desejadas
+baixas <- tabela_rec_baixa_total |> 
+  select(ano:baixa) |> 
+  filter(ano %in% c(ano_atual,ano_anterior))
+
+
+# Baixas
+baixas_proc <- as.numeric(baixas$baixa)
+perc_baixa <- round((((baixas_proc[2]-baixas_proc[1])/baixas_proc[1]))*100,2)
+
+text_baixa1 <- baixas |> 
+  select(ano,recebimento) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(baixa_1 = if_else(perc_baixa < 0, "a redução foi de" , "o aumento foi de")) |> 
+  mutate(paste0(baixa_1, " ", abs(perc_baixa), "%"))
+
+
+# Recebimento
+text_recebimentos <- tabela_rec_baixa_total |> 
+  select(ano:baixa) |> 
+  filter(ano %in% ano_atual) |> 
+  as.numeric()
+
+percent_receb_baixa <- paste0(round((((text_recebimentos[3]-text_recebimentos[2])/text_recebimentos[2]))*100,2), "%")
+
+
+text_rec <- tabela_rec_baixa_total |> 
+  select(ano:acervo_final) |> 
+  filter(ano %in% c(ano_atual,ano_anterior)) 
+
+# Diferença recebimento em comparação ao ano anterior
+vet_receb <- as.numeric(text_rec$recebimento)
+perc_rec <- round(((vet_receb[2]-vet_receb[1])/vet_receb[1])*100,2)
+
+text_r1 <- text_rec |> 
+  select(ano,recebimento) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(receb_1 = if_else(perc_rec < 0, "uma queda de" , "um aumento de")) |> 
+  mutate(paste0(receb_1, " ", abs(perc_rec), "%"))
+
+
+# Diferença do recursal (recebidos) em comparação ao ano anterior
+text_rec2 <- tabela_rec_total |> 
+  select(ano:RE) |> 
+  filter(ano %in% c(ano_atual,ano_anterior))
+
+# Por classe recursal - ARE
+perc_rec_are <- round(((text_rec2$ARE[2]-text_rec2$ARE[1])/text_rec2$ARE[1])*100,1)
+
+are_text <- tabela_rec_total |> 
+  select(ano,ARE) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(are_1 = if_else(perc_rec_are < 0, "Redução percentual de" , "Um aumento percentual de")) |> 
+  mutate(paste0(are_1, " ", abs(perc_rec_are), "%"))
+
+
+# Por classe recursal - RE  
+perc_rec_re <- round(((text_rec2$RE[2]-text_rec2$RE[1])/text_rec2$RE[1])*100,1)
+
+re_text <- tabela_rec_total |> 
+  select(ano,RE) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(re_1 = if_else(perc_rec_re < 0, "redução de aproximadamente" , "um aumento de aproximadamente")) |> 
+  mutate(paste0(re_1, " ", abs(perc_rec_re), "%"))
+
+
+# Originário
+perc_orig <- round(((text_rec2$originario[2]-text_rec2$originario[1])/text_rec2$originario[1])*100,1)
+
+orig_text <- tabela_rec_total |> 
+  select(ano,originario) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(orig_1 = if_else(perc_orig < 0, "redução substancial de" , "aumento substancial de")) |> 
+  mutate(paste0(orig_1, " ", abs(perc_orig), "%"))
+
+
+
+perc_recursal_total <- round(((text_rec2[[2,4]]-text_rec2[[1,4]])/text_rec2[[1,4]])*100,2)
+
+text_r2 <- tabela_rec_total |> 
+  select(ano,recursal) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(receb_2 = if_else(perc_recursal_total < 0, "Uma diminição de" , "Um aumento de")) |> 
+  mutate(paste0(receb_2, " ", abs(perc_recursal_total), "%"))
+
+
+# Recursos a mais/a menos
+text_r3 <- text_rec2[[2,4]]-text_rec2[[1,4]]
+
+text_r4 <- text_rec2 |> 
+  select(ano,recursal) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(receb_3 = if_else(text_r3 < 0, "a menos" , "a mais"))
+
+
+# Provimento
+prov_last_year <- prov_geral |> 
+  select(ano:re_prov) |> 
+  filter(ano %in% ano_atual)
+  
+
+
+  
+```
+
+
+
+Dos `r as.character(text_acervo_2021[6])` processos em tramitação, `r as.character(text_acervo_2021[2])` (`r as.character(text_acervo_2021[7])`) são originários e `r as.character(text_acervo_2021[3])` (`r as.character(text_acervo_2021[8])`) são recursais. Dos processos recebidos, `r as.character(text_recebidos_2021[3])` (`r as.character(text_recebidos_2021[8])`) são originários e `r as.character(text_recebidos_2021[4])` (`r as.character(text_recebidos_2021[9])`) são recursais. Ainda sobre os processos recebidos, `r as.character(text_pres_min_2021[5])` (`r as.character(text_pres_min_2021[2])`) foram registrados à presidência, com média mensal de `r round(text_pres_min_2021[5]/12,0)` processos e `r as.character(text_pres_min_2021[4])` (`r as.character(text_pres_min_2021[3])`) processos foram distribuídos aos ministros, com média mensal de `r round(text_pres_min_2021[4]/12,0)` processos. Isto significa uma média mensal de aproximadamente `r round((text_pres_min_2021[4]/12)/10,0)` processos por mês por Ministro.
+
+Em relação às decisões, contabilizou-se `r as.character(decisoes[[3]])`, sendo `r as.character(decisoes[[4]])` (`r as.character(decisoes[[6]])`) monocráticas e `r as.character(decisoes[[5]])` (`r as.character(decisoes[[7]])`) colegiadas. O número de processos baixados (`r as.character(baixas$baixa[2])`) foi `r percent_receb_baixa` <mark>maior do que o número de recebidos. Em relação ao ano anterior, a redução foi de 19% - 2021</mark> da quantidade de recebimento).
+
+<!-- Faltou colocar uma regra de maior/menor do que o número de recebidos! -->
 
 ## Acervo Processual
 
-O acervo geral do STF corresponde ao quantitativo de processos em tramitação no dia 31/12/2020, computados os registrados à presidência e distribuídos aos ministros. Em 2020, o Tribunal registrou o menor acervo processual dos últimos 21^[O [Relatório de atividades do biênio 2004 a 2006 ](http://www.stf.jus.br/arquivo/cms/centralDoCidadaoAcessoInformacaoGestaoEstrategica/anexo/Relatorio_de_Atividades_2004_a_2006.pdf) mostra dados do ano de 2000 que demonstram que haviam pelo menos 127 mil processos sem setença. O Relatório de Gestão de 2020 do Ministro Dias Tofolli apresenta a informação que seria nos últimos 24 anos e precisaria ser levantado junto à SAE em relatórios anteriores.] anos, com <mark>26.256</mark> processos em tramitação.Desde 2016 a corte acumula uma redução de aproximadamente <mark>56%</mark> no acervo
-geral.
+O acervo geral do STF corresponde ao quantitativo de processos em tramitação no dia `r data_tramitacao`, computados os registrados à presidência e distribuídos aos ministros. Em `r ano_atual`, o Tribunal registrou o menor acervo processual dos últimos 22^[O [Relatório de atividades do biênio 2004 a 2006 ](http://www.stf.jus.br/arquivo/cms/centralDoCidadaoAcessoInformacaoGestaoEstrategica/anexo/Relatorio_de_Atividades_2004_a_2006.pdf) mostra dados do ano de 2000 que demonstram que haviam pelo menos 127 mil processos sem setença. O Relatório de Gestão de 2020 do Ministro Dias Tofolli apresenta a informação que seria nos últimos 24 anos e precisaria ser levantado junto à SAE em relatórios anteriores.] anos, com `r as.character(text_acervo_2021[6])` processos em tramitação. Desde 2016 a corte acumula `r text_a1[3]` no acervo geral.
+
 
 ```{r grafico1, echo=FALSE, warning=FALSE}
-
-tabela_acervo <- readRDS("../data_raw/tabela_acervo.rds")
-
 
 tabela_acervo  |>
   ggplot(aes(x = ano, y = acervo_total)) +
@@ -76,8 +283,7 @@ tabela_acervo  |>
  
 ```
 
-
-Os gráficos abaixo mostram a evolução dos processos originários e recursais, desde 2016. Houve uma redução em 16% no acervo de 2019 para 2020.
+Os gráficos abaixo mostram a evolução dos processos originários e recursais, desde 2016. Houve `r as.character(text_a2[8])` no acervo de `r ano_anterior` para `r ano_atual`.
 
 ```{r grafico2, echo=FALSE, warning=FALSE}
 
@@ -110,7 +316,7 @@ acervo_orig_rec |>
 ```
 
 
-Historicamente há uma certa estabilidade em relação aos processos originários. Para os recursais, no entanto, há uma expressiva redução no acervo de magnitude de 70% em relação a 2016, e de 20% com relação a 2019.
+Historicamente há uma certa estabilidade em relação aos processos originários. Para os recursais, no entanto, há uma expressiva redução no acervo de magnitude de `r text_a3[4]` em relação a 2016, e de `r abs(num_acervo3)`% com relação a `r ano_anterior`.
 
 ```{r grafico3, echo=FALSE, warning=FALSE}
 # OK - 2021
@@ -136,12 +342,9 @@ acervo_autuacao |>
 Mais de <mark>70%</mark> dos processos do acervo têm menos de 1 ano de autuação.
 Aproximadamente <mark>89%</mark> do acervo é composto por feitos autuados nos últimos 5 anos. Estes resultados demonstram o compromisso do STF com a redução do acervo de processos antigos e o alcance da meta do Indicador de Processos Antigos.
 
-Com relação ao Ramo do Direito, a categoria Direito Administrativo e Outras Matérias do Direito Público corresponde a mais de <mark>35%</mark> do total, seguida por Direito Processual Penal <mark>(15,69%) e Direito Tributário (10,96%)</mark>.
+Com relação ao Ramo do Direito, a categoria Direito Administrativo e Outras Matérias do Direito Público corresponde a `r ramo_direito$percent_ramo[1]` do total, seguida por Direito Processual Penal `r ramo_direito$percent_ramo[2]` e Direito Tributário (`r ramo_direito$percent_ramo[3]`). <mark>Pendente automatizar nomes dos ramos!</mark>
 
 ```{r tabela2, echo=FALSE, warning=FALSE}
-
-# Dados RDS
-ramo_direito <- readRDS("../data_raw/ramo_direito.rds")
 
 # Organizando nome da coluna
 colnames(ramo_direito) <- c("Ramo do direito", "Quantidade de processos", "% do total")
@@ -155,7 +358,7 @@ colnames(ramo_direito) <- c("Ramo do direito", "Quantidade de processos", "% do 
 
 ```
 
-Por fim, a tramitação por meio eletrônico corresponde a 96% do acervo de 2020, conforme gráfico a seguir.
+Por fim, a tramitação por meio eletrônico corresponde a `r text_a2[[4]]*100`% do acervo de `r ano_atual`, conforme gráfico a seguir.
 
 ```{r grafico4, echo=FALSE, , warning=FALSE}
 # OK - 2021
@@ -189,7 +392,7 @@ acervo_eletro_fis |>
 ```
 
 
-Desde 2013 a tramitação eletrônica supera a física. O esforço para a digitalização do acervo, uma das diretrizes estratégicas da corte, decorre da implantação de novas tecnologias e sistemas de automação. <mark>Em relação a 2019 houve diminuição de mais 2% dos processos físicos, resultado que corrobora a visão da Gestão de um STF 100% Digital.</mark>
+Desde 2013 a tramitação eletrônica supera a física. O esforço para a digitalização do acervo, uma das diretrizes estratégicas da corte, decorre da implantação de novas tecnologias e sistemas de automação. Em relação a `r ano_anterior` houve diminuição de mais `r abs(num_acervo5)`% dos processos físicos, resultado que corrobora a visão da Gestão de um STF 100% Digital.
 
 ## Recebimento
 
@@ -202,17 +405,15 @@ De modo geral, o fluxo de tramitação processual no STF ocorre nas macro etapas
 </center>
 
 
-
 O processamento começa com o recebimento, autuação e análise inicial do processo pela SEJ. Consideram-se recebidos os processos ajuizados diretamente no STF, denominados "Originários" e os provenientes de outros juízos ou tribunais, chamados de "Recursais".
 
 ### Recebimento Geral
 
-Em 2020, o STF recebeu <mark>75.137</mark> processos, uma queda de <mark>20%</mark> em relação ao ano de 2019.
+Em `r ano_atual`, o STF recebeu `r text_rec$recebimento[2]` processos,  `r text_r1[[4]]` em relação ao ano de `r ano_anterior`.
 
 ```{r grafico5, echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
 # 2021 - OK
 # Dados RDS
-tabela_rec_total <- readRDS("../data_raw/tabela_rec_total.rds")
 
 dados <-
   structure(list(Ano = tabela_rec_total$ano, 
@@ -239,11 +440,11 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
 ```
 
 
-Uma vez recebidos, os processos são autuados pela SEJ, com posterior registro à Presidência ou distribuição aos Ministros. <mark>51%</mark> dos processos recebidos foram registrados à Presidência. A ampliação da atuação da presidência pode ser observada nos gráficos a seguir, que mostram o percentual e a quantidade de registros, respectivamente:
+Uma vez recebidos, os processos são autuados pela SEJ, com posterior registro à Presidência ou distribuição aos Ministros. `r text_pres_min_2021[[2]]` dos processos recebidos foram registrados à Presidência. A ampliação da atuação da presidência pode ser observada nos gráficos a seguir, que mostram o percentual e a quantidade de registros, respectivamente:
 
 ```{r grafico6, echo=FALSE, warning=FALSE}
 # OK - 2021
-tab_percent_total <- readRDS("../data_raw/tabela_perc_total.rds")
+tab_percent_total <- tabela_perc_total
 
 colnames(tab_percent_total)[2] <- "Registrados à Presidência"
 colnames(tab_percent_total)[3] <- "Distribuídos aos Ministros"
@@ -256,7 +457,6 @@ tab_percent_total |>
     names_to = "destino",
     values_to = "qtd"
   )
-
 
 percent_total |> 
   ggplot(aes(x = ano, y = qtd, group=factor(destino))) +
@@ -314,11 +514,9 @@ A soma dos processos distribuídos aos ministros e registrados à presidência n
 
 ### Recebimento de Recursos
 
-Ao se analisar apenas as classes recursais (ARE/RE/AI), constata-se que, em 2020, o STF recebeu <mark>47.783</mark> recursos, cerca de <mark>21.900</mark> a menos em relação ao ano anterior. Uma diminuição de 31%.
+Ao se analisar apenas as classes recursais (ARE/RE/AI), constata-se que, em `r ano_atual`, o STF recebeu `r as.character(text_rec2[[2,4]])` recursos, cerca de `r text_rec2[[2,4]]-text_rec2[[1,4]]` `r text_r4[[1,3]]` em relação ao ano anterior. `r text_r2[[1,4]]`.
 
 Ressalta-se que o Regimento Interno do STF atribui ao Presidente a competência de decidir os recursos manifestamente inadmissíveis. Essa atividade vem se sofisticando ao longo dos anos e alcançou nível de refinamento que permite o julgamento da maior parte dos recursos.
-
-Obs: Neste ponto, fazer um infográfico como o da página 31 do Relatório de Atividades 2019. O percentual de recursos registrados à presidência foi de 74%.
 
 Os dois gráficos a seguir mostram, respectivamente, os percentuais e quantidades de recursos registrados à presidência e distribuídos aos ministros.
 
@@ -399,16 +597,13 @@ Este significativo avanço da atuação da Presidência na esfera recursal é re
 Outra atividade significativa foi o avanço na interlocução com os tribunais de origem contribuiu para essa significativa diminuição no recebimento de processos. Através de uma agenda de visitas institucionais que tinha como objetivo alinhamento institucional, cooperação, integração e valorização dos tribunais foi possui manter comunicação direta. A partir deste contato surgiram os cursos de capacitação que visavam o aperfeiçoamento do juízo de admissibilidade, a consolidação da sistemática da repercussão geral, afetação de representativos de controvérsia e redução de envio de recursos inaptos
 ao STF.
 
-Os dois gráficos a seguir mostram a evolução dos processos recebidos em classes recursais apenas para o ano de 2020. Desse total, foram
-registrados à Presidência por mês <mark>3.101 processos</mark>, em média. Foram distribuídos aos Ministros 2.930 processos por mês, em média, no mesmo período.
+Os dois gráficos a seguir mostram a evolução dos processos recebidos em classes recursais apenas para o ano de `r ano_atual`. Desse total, foram registrados à Presidência por mês `r qtd_2_rec$mes_presid`, em média. Foram distribuídos aos Ministros `r qtd_2_rec$mes_min` processos por mês, em média, no mesmo período.
 
 ```{r grafico10, echo=FALSE, warning=FALSE}
 # OK - 2021
 
-receb_rec <- readRDS("../data_raw/tabela_rec_total.rds")
-
 recebidos_recursais <- 
-receb_rec |> 
+tabela_rec_total |> 
   select(ano,ARE:RE) |> 
   pivot_longer(
     cols = ARE:RE,
@@ -437,8 +632,6 @@ recebidos_recursais |>
 ```{r grafico11, echo=FALSE, warning=TRUE}
 # OK - 2021
 
-df_classes <- readRDS("../data_raw/df_classes.rds")
-
 dados <- data.frame(Processos = factor(df_classes$class_names), 
                        Proporção = df_classes$total_perc)
 
@@ -463,9 +656,10 @@ ggplot(dados, aes(x = Ano, y = Proporção, fill = Processos)) +
 ```
 
 
-Redução percentual de <b>23%</b> de recebimentos de ARE em relação a 2019 <mark>e redução percentual de aproximadamente 25% de recebimento de RE.</mark>
+`r are_text[[4]]` em recebimentos de ARE com relação a `r ano_anterior` e `r re_text[[4]]` de recebimento de RE.</mark>
 
-Conforme relatório sobre a taxa de provimento, as decisões dos tribunais de origem são confirmadas pelo Supremo em <mark>5,2%</mark>^[Sugiro usar a partir de 2015 ou 2016 para inserir no Relatório de Atividades.] dos casos. A taxa de provimento por classes é de <mark>1,2%</mark> para ARE e <mark>22,2%</mark> para RE.
+
+Conforme relatório sobre a taxa de provimento, as decisões dos tribunais de origem são confirmadas pelo Supremo em `r  as.character(prov_last_year[[2]])` dos casos. A taxa de provimento por classes é de `r prov_last_year[[4]]`% para ARE e `r as.character(prov_last_year[[5]])`% para RE.
 
 ```{r grafico12, echo=FALSE, warning=TRUE}
 
@@ -479,14 +673,13 @@ eram relacionados aos seguintes motivos:
 
 <center><span class="border-highlight"><b>Tabela 3 - Motivo inaptidão - Euler </center> </span></b>
 
-### Recebimento de Originários
+### Recebimento de Originários 
 
-Em 2020, o STF recebeu <mark>25.354</mark> processos originários. É possível notar, no gráfico a seguir, aumento substancial de 20% em relação ao ano anterior.
+Em `r ano_atual`, o STF recebeu `r as.character(text_recebidos_2021[[3]])` processos originários. É possível notar, no gráfico a seguir, `r orig_text[[4]]` em relação ao ano anterior.
 
 ```{r grafico13, echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
 # 2021 - OK
 # Dados RDS
-tabela_rec_total <- readRDS("../data_raw/tabela_rec_total.rds")
 
 dados <-
   structure(list(Ano = tabela_rec_total$ano, 
@@ -513,7 +706,7 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
 ```
 
 
-Para o ano de 2020, temos, em bases percentuais:
+Para o ano de `r ano_atual`, temos, em bases percentuais:
 
 ```{r grafico14, echo=FALSE, warning=FALSE}
 # OK - 2021
@@ -563,7 +756,7 @@ colnames(tab_total_class) <- c("Classe originária", "Grupo","2016","2017","2018
 
 <mark>Houve aumento de mais de 50% de processos de Controle Concentrado, com destaque para as classes ADI (+46%) e ADPF (+64%). Além disso, houve expressivo aumento de HC, com aumento de 21% no recebimento de processos. Estes aumentos podem estar relacionados com contexto da pandemia COVID-19.</mark> Além disso, mais de <mark>90%</mark> dos processos pertencem às classes Habeas Corpus, Reclamação e Recurso em Habeas Corpus.
 
-## Julgamentos
+## Julgamentos <mark>EM ANDAMENTO AQUI!</mark>
 
 O julgamento do processo é identificado pela decisão final, a qual extingue o processo ainda que o mérito da causa não seja apreciado. É o que ocorre, por exemplo, nas decisões de não conhecimento, de prejudicialidade, de homologação de desistência e de negativa de seguimento. Se houver decisão final no processo e decurso do prazo processual sem interposição de recurso, ocorrerá o trânsito em julgado da decisão e, subsequentemente, a baixa do processo. No mais, destaca-se que é possível a cumulação de mais de uma decisão em cada feito. O
 gráfico a seguir mostra a quantidade de decisões e a quantidade de decisões finais.
@@ -603,7 +796,6 @@ Ademais, as decisões podem ser classificadas em monocráticas <mark>(82%)</mark
 ```{r grafico16, echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
 # 2021 - OK
 # Dados RDS
-tabela_dec <- readRDS("../data_raw/tabela_dec.rds")
 
 dados <-
   structure(list(Ano = tabela_dec$ano, 
@@ -633,7 +825,6 @@ ggplot(dados, aes(x = Ano, y = Processos)) +
 ```{r grafico17, echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
 # 2021 - OK
 # Dados RDS
-tabela_dec <- readRDS("../data_raw/tabela_dec.rds")
 
 dados <-
   structure(list(Ano = tabela_dec$ano, 
@@ -747,7 +938,6 @@ A taxa de produtividade é a divisão da quantidade de processos baixados pela q
 ```{r produtividade, echo=FALSE, warning=FALSE}
 
 # Dados RDS
-tabela_rec_baixa_total <- readRDS("../data_raw/tabela_rec_baixa_total.rds")
 
 # Organizando nome da coluna
 colnames(tabela_rec_baixa_total) <- c("Ano","Recebimento","Baixa","Taxa de produtividade", "Acervo Final")
@@ -762,7 +952,7 @@ colnames(tabela_rec_baixa_total) <- c("Ano","Recebimento","Baixa","Taxa de produ
 ```
 
 
-A taxa de produtividade foi de <mark>104,4%</mark>. O acervo final de 2020, observado em 31/12/2020, foi cerca de <mark>16%</mark> menor do que o acervo final de 2019.
+A taxa de produtividade foi de <mark>104,4%</mark>. O acervo final de 2020, observado em `r data_tramitacao`, foi cerca de <mark>16%</mark> menor do que o acervo final de 2019.
 Esse resultado demonstra o esforço do STF em tornar o processo de julgamento mais célere. Por fim, o gráfico a seguir mostra a quantidade de processos baixados, recebidos e o acervo final por ano.
 
 ```{r grafico19, echo=FALSE, warning=FALSE}
