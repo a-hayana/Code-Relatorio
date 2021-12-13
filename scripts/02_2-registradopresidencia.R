@@ -189,24 +189,24 @@ qtd_recursal_pres_min_2 <- full_recebidos |>
 # Resumo --------------------------------------------------------
 
 # Tabela 13: Processos Registrados à Presidência e Distribuídos aos Ministros --------
-View(tabela_perc_total)
+# View(tabela_perc_total)
 # saveRDS(tabela_perc_total, "tabela_perc_total.rds")
 
 # Tabela 14: Processos Distribuídos aos Ministros - Quantidade -------------
 # Tabela 15: Percentual de Recursos Distribuídos aos Ministros ------------
 # Tabela 16: Quantidade de Recursos  Distribuídos aos Ministros -----------
-View(tabela_rec_min_total)
+# View(tabela_rec_min_total)
 # saveRDS(tabela_rec_min_total, "tabela_rec_min_total.rds")
 
 # Tabela 14: Processos Registrados à Presidência - Quantidade -------------
 # Tabela 15: Percentual de Recursos registrados à Presidência -------------
 # Tabela 16: Quantidade de Recursos registrados à Presidência -------------
-View(tabela_rec_pres_total)
+# View(tabela_rec_pres_total)
 # saveRDS(tabela_rec_pres_total, "tabela_rec_pres_total.rds")
 
 
 # Para gráfico: Quantidade total - Presidência x Ministros ------------------------------
-View(qtd_total_pres_min)
+# View(qtd_total_pres_min)
 # saveRDS(qtd_total_pres_min, "qtd_total_pres_min.rds")
 
 

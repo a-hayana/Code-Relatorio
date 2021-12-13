@@ -8,7 +8,7 @@ produtiv_hist <- read_excel("dados/relatorio_historico.xlsx",
 # Tabela histórica - Produtividade ----------------------------
 produtiv_geral_hist <- produtiv_hist |>
   select(ano:acervo_final) |>
-  mutate(taxa_produtiv = paste0(round(taxa_produtiv,4)*100,"%"))
+  mutate(taxa_produtiv = round(taxa_produtiv,4)*100)
 
 
 # Tabela histórica - Temas de RG no Plenário Virtual -----------------------------------
@@ -24,8 +24,8 @@ temas_julg_hist <- produtiv_hist |>
 # Tabela 2021 -------------------------------------------------------------
 
 
-# RECEBIDOS/BAIXA -> Ver aba "02_1-recebidos"
+# Produtividade: RECEBIDOS/BAIXA -> Ver aba "02_1-recebidos"
 
 
-# PENDENTE!
-# Falta:RG RECONHECIDA / RG NEGADA / MERITO JULGADO / REAF. JURIS
+# PENDENTE AQUI! (EULER)
+# Falta: RG RECONHECIDA / RG NEGADA / MERITO JULGADO / REAF. JURIS

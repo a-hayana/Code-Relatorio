@@ -137,15 +137,15 @@ faltantes_ramo <- acervo2021_sep |>
 # Tabela 7: Evolução do Acervo --------------------------------------------
 # Tabela 8: Evolução do Acervo - Originários e Recursais ------------------
 # Tabela 11: Acervo Físico x Eletrônico -----------------------------------
-View(tabela_acervo)
-# saveRDS(tabela_acervo, file = "data_rawtabela_acervo.rds")
+# View(tabela_acervo)
+# saveRDS(tabela_acervo, file = "data_raw/tabela_acervo.rds")
 
 
 # Tabela 9: Acervo por Ano de Autuação
-View(acervo_autuacao)
+# View(acervo_autuacao)
 # saveRDS(acervo_autuacao, file = "data_raw/acervo_autuacao.rds")
 
 
 # Tabela 10: Acervo por Ramo do Direito -----------------------------------
-View(ramo_direito)
+# View(ramo_direito)
 # saveRDS(ramo_direito, file = "data_raw/ramo_direito.rds")

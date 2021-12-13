@@ -1,5 +1,5 @@
 ---
-title: "**Relatório da Prestação Jurisdicional 2020**"
+title: "**Relatório da Prestação Jurisdicional 2021**"
 author: "Supremo Tribunal Federal (STF)"
 date: "`r format(Sys.Date(), format='%d/%m/%Y')`"
 encoding: "UTF-8"
@@ -54,6 +54,7 @@ data_tramitacao <- "01/01/2021"
 
 tabela_acervo <- readRDS("../data_raw/tabela_acervo.rds")
 tabela_rec_total <- readRDS("../data_raw/tabela_rec_total.rds")
+decisoes2021 <- readRDS("../data_raw/decisoes2021.rds")
 tabela_perc_total <- readRDS("../data_raw/tabela_perc_total.rds")
 tabela_text_total <- readRDS("../data_raw/tabela_text_total.rds")
 tabela_dec <- readRDS("../data_raw/tabela_dec.rds")
@@ -62,6 +63,10 @@ ramo_direito <- readRDS("../data_raw/ramo_direito.rds")
 df_classes <- readRDS("../data_raw/df_classes.rds")
 qtd_recursal_pres_min_2 <- readRDS("../data_raw/qtd_recursal_pres_min_2.rds")
 prov_geral <- readRDS("../data_raw/prov_geral.rds")
+tx_recorr <- readRDS("../data_raw/tabela_recorr_2021_total.rds")
+recor_table_tipo <- readRDS("../data_raw/recor_table_tipo.rds")
+decisoes_tipo_r <- readRDS("../data_raw/decisoes_tipo_r.rds")
+text_total_col <- readRDS("../data_raw/text_total_col.rds")
 
 # Manipulações - texto ----------------------------------------
 
@@ -69,8 +74,7 @@ prov_geral <- readRDS("../data_raw/prov_geral.rds")
 text_acervo_2021 <- tabela_acervo |> 
   select(ano:acervo_total) |> 
   filter(ano %in% ano_atual) |> 
-  mutate(perc_orig = paste0(round((originario/acervo_total*100),2),"%")) |>  
-  mutate(perc_rec = paste0(round((recursal/acervo_total)*100,2), "%")) |> 
+  mutate(perc_orig = paste0(round((originario/acervo_total*100),2),"%")) |>   mutate(perc_rec = paste0(round((recursal/acervo_total)*100,2), "%")) |> 
   mutate(eletronico = paste0(round((eletronico*100),2),"%"),
          fisico = paste0(round((fisico*100),2),"%")) # |> 
   # as.character()
@@ -109,6 +113,12 @@ text_a2 <- num_acervo2 |>
   mutate(acervo_total3 = if_else(text_num_acervo2 < 0, "uma redução em" , "um aumento de")) |> 
   mutate(paste0(acervo_total3, " ", abs(text_num_acervo2), "%")) 
 
+text_a2_2 <- num_acervo2 |> 
+  select(ano:acervo_total) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(acervo_total3 = if_else(text_num_acervo2 < 0, " menor do que" , " maior do que")) |> 
+  mutate(paste0(abs(text_num_acervo2), "%", acervo_total3)) 
+
 text_a3 <- tabela_acervo |> 
   select(ano,recursal) |> 
   filter(ano %in% ano_atual) |> 
@@ -143,8 +153,7 @@ decisoes <- tabela_dec |>
   select(ano:decisoes_colegiadas) |> 
   filter(ano %in% ano_atual) |> 
   mutate(perc_mono = paste0(round((decisoes_monocraticas/total_decisoes*100),2),"%")) |>  
-  mutate(perc_col = paste0(round((decisoes_colegiadas/total_decisoes)*100,2), "%")) # |> 
-  # as.character()
+  mutate(perc_col = paste0(round((decisoes_colegiadas/total_decisoes)*100,2), "%")) 
 
 # Baixa - Selecionando as variáveis desejadas
 baixas <- tabela_rec_baixa_total |> 
@@ -163,14 +172,32 @@ text_baixa1 <- baixas |>
   mutate(paste0(baixa_1, " ", abs(perc_baixa), "%"))
 
 
-# Recebimento
+# Recebimento 
 text_recebimentos <- tabela_rec_baixa_total |> 
   select(ano:baixa) |> 
   filter(ano %in% ano_atual) |> 
   as.numeric()
 
-percent_receb_baixa <- paste0(round((((text_recebimentos[3]-text_recebimentos[2])/text_recebimentos[2]))*100,2), "%")
+percent_receb_baixa <- round((((text_recebimentos[3]-text_recebimentos[2])/text_recebimentos[2]))*100,2)
 
+text_baixa2 <- baixas |> 
+  select(ano,recebimento) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(baixa_3 = if_else(percent_receb_baixa < 0, " menor do que o número de recebidos" , " maior do que o número de recebidos")) |> 
+  mutate(paste0(abs(percent_receb_baixa), "%", baixa_3))
+
+
+
+# Texto - Recebimento em relação ao ano anterior 
+receb_text <- as.numeric(baixas$recebimento)
+perce_text_recb <- round((receb_text[2]-receb_text[1])/receb_text[1]*100,2)
+
+text_receb_3 <- baixas |> 
+  select(ano,recebimento) |> 
+  filter(ano %in% ano_atual) |>
+  mutate(baixa_5 = if_else(perce_text_recb < 0, " a redução foi de " , " o aumento foi de ")) |> 
+  mutate(paste0(baixa_5, abs(perce_text_recb), "%"))
+  
 
 text_rec <- tabela_rec_baixa_total |> 
   select(ano:acervo_final) |> 
@@ -185,6 +212,12 @@ text_r1 <- text_rec |>
   filter(ano %in% ano_atual) |> 
   mutate(receb_1 = if_else(perc_rec < 0, "uma queda de" , "um aumento de")) |> 
   mutate(paste0(receb_1, " ", abs(perc_rec), "%"))
+
+# Taxa de produtividade - texto
+produtiv <- tabela_rec_baixa_total |> 
+  select(ano:taxa_produtiv) |> 
+  filter(ano %in% ano_atual)
+
 
 
 # Diferença do recursal (recebidos) em comparação ao ano anterior
@@ -222,7 +255,6 @@ orig_text <- tabela_rec_total |>
   mutate(paste0(orig_1, " ", abs(perc_orig), "%"))
 
 
-
 perc_recursal_total <- round(((text_rec2[[2,4]]-text_rec2[[1,4]])/text_rec2[[1,4]])*100,2)
 
 text_r2 <- tabela_rec_total |> 
@@ -247,7 +279,54 @@ prov_last_year <- prov_geral |>
   filter(ano %in% ano_atual)
   
 
+# Tabela - Texto monocráticas/colegiadas por presid/ministros 
 
+text_total <-  decisoes2021 |> 
+  filter(tipo_decisao == "MONOCRÁTICA") |>
+  summarise(n = sum(qtd_ocorrencias_processuais))
+
+presid_mono <-  decisoes2021 |> 
+     group_by(orgao_julgador) |> 
+    filter(tipo_decisao == "MONOCRÁTICA") |>
+    filter(orgao_julgador == "PRESIDÊNCIA") |> 
+    summarise(n = sum(qtd_ocorrencias_processuais))
+
+percent_pres_mono = round((presid_mono$n/text_total$n)*100,2)
+
+
+# Texto - Recorribilidade - Geral
+
+text_recor <- tx_recorr |> 
+  select(ano:taxa_rec) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(percent_rec = paste0(taxa_rec,"%"))  
+  
+
+# Texto - Recorribilidade - orginiário e recursal 
+
+rec_total <-  recor_table_tipo  |>
+  group_by(tipo) |>
+  summarise(n = sum(qtd_ocorrencias_processuais)) 
+
+
+# Total de decisões - originario x recursal
+
+dec_total_r <-  decisoes_tipo_r |>
+  group_by(tipo) |>
+  summarise(n = sum(qtd_ocorrencias_processuais)) 
+
+taxa_recorr <- round((rec_total$n/dec_total_r$n)*100,1)
+
+perc <- cbind(rec_total$tipo,taxa_recorr)
+
+
+# Total - Por órgão - Colegiado
+text_orgao3 <- text_total_col |>
+  group_by(orgao_julgador3) |>
+  filter(tipo_decisao == "COLEGIADA") |>
+  filter(orgao_julgador3 %in% c("Turmas", "Plenário")) |>
+  summarise(n = sum(qtd_ocorrencias_processuais)) |> 
+  mutate(percent_orgao3 = round(n/sum(n),4)*100)
   
 ```
 
@@ -255,9 +334,8 @@ prov_last_year <- prov_geral |>
 
 Dos `r as.character(text_acervo_2021[6])` processos em tramitação, `r as.character(text_acervo_2021[2])` (`r as.character(text_acervo_2021[7])`) são originários e `r as.character(text_acervo_2021[3])` (`r as.character(text_acervo_2021[8])`) são recursais. Dos processos recebidos, `r as.character(text_recebidos_2021[3])` (`r as.character(text_recebidos_2021[8])`) são originários e `r as.character(text_recebidos_2021[4])` (`r as.character(text_recebidos_2021[9])`) são recursais. Ainda sobre os processos recebidos, `r as.character(text_pres_min_2021[5])` (`r as.character(text_pres_min_2021[2])`) foram registrados à presidência, com média mensal de `r round(text_pres_min_2021[5]/12,0)` processos e `r as.character(text_pres_min_2021[4])` (`r as.character(text_pres_min_2021[3])`) processos foram distribuídos aos ministros, com média mensal de `r round(text_pres_min_2021[4]/12,0)` processos. Isto significa uma média mensal de aproximadamente `r round((text_pres_min_2021[4]/12)/10,0)` processos por mês por Ministro.
 
-Em relação às decisões, contabilizou-se `r as.character(decisoes[[3]])`, sendo `r as.character(decisoes[[4]])` (`r as.character(decisoes[[6]])`) monocráticas e `r as.character(decisoes[[5]])` (`r as.character(decisoes[[7]])`) colegiadas. O número de processos baixados (`r as.character(baixas$baixa[2])`) foi `r percent_receb_baixa` <mark>maior do que o número de recebidos. Em relação ao ano anterior, a redução foi de 19% - 2021</mark> da quantidade de recebimento).
+Em relação às decisões, contabilizou-se `r as.character(decisoes[[3]])`, sendo `r as.character(decisoes[[4]])` (`r as.character(decisoes[[6]])`) monocráticas e `r as.character(decisoes[[5]])` (`r as.character(decisoes[[7]])`) colegiadas. O número de processos baixados (`r as.character(baixas$baixa[2])`) foi `r text_baixa2[[1,4]]`. Em relação ao ano anterior,`r text_receb_3[[1,4]]` da quantidade de recebimento.
 
-<!-- Faltou colocar uma regra de maior/menor do que o número de recebidos! -->
 
 ## Acervo Processual
 
@@ -659,14 +737,14 @@ ggplot(dados, aes(x = Ano, y = Proporção, fill = Processos)) +
 `r are_text[[4]]` em recebimentos de ARE com relação a `r ano_anterior` e `r re_text[[4]]` de recebimento de RE.</mark>
 
 
-Conforme relatório sobre a taxa de provimento, as decisões dos tribunais de origem são confirmadas pelo Supremo em `r  as.character(prov_last_year[[2]])` dos casos. A taxa de provimento por classes é de `r prov_last_year[[4]]`% para ARE e `r as.character(prov_last_year[[5]])`% para RE.
+Conforme relatório sobre a taxa de provimento, as decisões dos tribunais de origem são confirmadas pelo Supremo em `r  as.character(prov_last_year[[2]])`% dos casos. A taxa de provimento por classes é de `r prov_last_year[[4]]`% para ARE e `r as.character(prov_last_year[[5]])`% para RE.
 
 ```{r grafico12, echo=FALSE, warning=TRUE}
 
 # FALTANDO!
 
 ```
-<center><span class="border-highlight"><b>Gráfico 12 </center> </span></b>
+<center><span class="border-highlight"><b>Gráfico 12 - Euler </center> </span></b>
 
 Dos recursos apresentados à Presidência aproximadamente <mark>90%</mark> dos óbices
 eram relacionados aos seguintes motivos:
@@ -756,7 +834,7 @@ colnames(tab_total_class) <- c("Classe originária", "Grupo","2016","2017","2018
 
 <mark>Houve aumento de mais de 50% de processos de Controle Concentrado, com destaque para as classes ADI (+46%) e ADPF (+64%). Além disso, houve expressivo aumento de HC, com aumento de 21% no recebimento de processos. Estes aumentos podem estar relacionados com contexto da pandemia COVID-19.</mark> Além disso, mais de <mark>90%</mark> dos processos pertencem às classes Habeas Corpus, Reclamação e Recurso em Habeas Corpus.
 
-## Julgamentos <mark>EM ANDAMENTO AQUI!</mark>
+## Julgamentos 
 
 O julgamento do processo é identificado pela decisão final, a qual extingue o processo ainda que o mérito da causa não seja apreciado. É o que ocorre, por exemplo, nas decisões de não conhecimento, de prejudicialidade, de homologação de desistência e de negativa de seguimento. Se houver decisão final no processo e decurso do prazo processual sem interposição de recurso, ocorrerá o trânsito em julgado da decisão e, subsequentemente, a baixa do processo. No mais, destaca-se que é possível a cumulação de mais de uma decisão em cada feito. O
 gráfico a seguir mostra a quantidade de decisões e a quantidade de decisões finais.
@@ -767,7 +845,7 @@ gráfico a seguir mostra a quantidade de decisões e a quantidade de decisões f
 
 ```
 
-<center><span class="border-highlight"><b>Gráfico 15 </center> </span></b>
+<center><span class="border-highlight"><b>Gráfico 15 - Euler </center> </span></b>
 
 Além da decisão final, há outras espécies em menor quantidade, conforme apresentado na tabela seguinte com os respectivos quantitativos.
 
@@ -790,7 +868,7 @@ colnames(tabela_dec_especies_2021)[1] <- "Decisões por espécie"
 ```
 
 
-Ademais, as decisões podem ser classificadas em monocráticas <mark>(82%)</mark> e colegiadas<mark>(18%)</mark>. Entre as monocráticas, <mark>56%</mark> foram decisões proferidas por Ministros e <mark>44%</mark> pelo Ministro Presidente. Entre as decisões colegiadas, cerca de <mark>68%</mark> foram proferidas pelas turmas e <mark>32%</mark> pelo Plenário. <mark>Houve um aumento de 2% nas decisões colegiadas, reforçando o princípio da Colegialidade.</mark> Os gráficos a seguir mostram o quantitativo de decisões monocráticas e colegiadas por ano.
+Ademais, as decisões podem ser classificadas em monocráticas (`r as.character(decisoes[[6]])`) e colegiadas (`r as.character(decisoes[[7]])`). Entre as monocráticas, `r as.character(100-percent_pres_mono)`% foram decisões proferidas por Ministros e `r as.character(percent_pres_mono)`% pelo Ministro Presidente. Entre as decisões colegiadas, cerca de `r text_orgao3$percent_orgao3[[2]]`% foram proferidas pelas turmas e `r text_orgao3$percent_orgao3[[1]]`% pelo Plenário. <mark>Houve um aumento de 2% nas decisões colegiadas, reforçando o princípio da Colegialidade.</mark> Os gráficos a seguir mostram o quantitativo de decisões monocráticas e colegiadas por ano.
 
 
 ```{r grafico16, echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
@@ -892,13 +970,13 @@ colnames(tabela_final_plen)[1] <- "Decisões do Plenário por Classe"
 
 Os números constantes da tabela a seguir demonstram a importância da adoção no STF da gestão estratégica focada na implementação de sua transformação digital como instrumento indispensável à entrega de uma prestação jurisdicional mais célere e efetiva para a sociedade.
 
-<center><span class="border-highlight"><b>Tabela 8 </center> </span></b>
+<center><span class="border-highlight"><b>Tabela 8 - Euler </center> </span></b>
 
-São os quantitativos de decisões em sessões virtuais por órgão julgador, em 2020.
+São os quantitativos de decisões em sessões virtuais por órgão julgador, em `r ano_atual`.
 
-Foram realizadas 77 sessões no Plenário presenciais, sendo 37 ordinárias e 40 extraordinárias, além de 40 sessões no Plenário virtual. Ainda foram realizadas 3 sessões solenes: Abertura do Ano Judiciário 2020; posse dos Ministros Luiz Fux e Rosa Weber na Presidência e Vice-Presidência do STF e CNJ; e posse do Dr. Kassio Nunes Marques no cargo de Ministro do Supremo Tribunal Federal.
+Foram realizadas <mark>77 sessões</mark> no Plenário presenciais, sendo <mark>37 ordinárias</mark> e <mark>40 extraordinárias</mark>, além de <mark>40 sessões no Plenário virtual</mark>. Ainda foram realizadas <mark>3 sessões solenes: Abertura do Ano Judiciário 2020; posse dos Ministros Luiz Fux e Rosa Weber na Presidência e Vice-Presidência do STF e CNJ; e posse do Dr. Kassio Nunes Marques no cargo de Ministro do Supremo Tribunal Federal.</mark>
 
-Em 2020, foram publicados <mark>18.188</mark> acórdãos.
+Em `r ano_atual`, foram publicados <mark>18.188</mark> acórdãos.
 
 Em 2019, a Presidência passou a divulgar a pauta dos julgamentos agendados para o semestre seguinte, em primazia da previsibilidade. Com isso, a sociedade como um todo pôde mobilizar-se em torno dos temas
 pautados, instaurando-se o debate democrático que deve preceder à análise de questões de grande relevância. Acesse a pauta pelo QRCode.
@@ -910,8 +988,6 @@ pautados, instaurando-se o debate democrático que deve preceder à análise de 
 Após a decisão monocrática, pode haver a interposição de agravo regimental ou a oposição de embargos de declaração, infringentes ou de divergência. Nesses casos, o processo será concluso ao relator para que o recurso interno seja julgado. O gráfico a seguir mostra a taxa de recorribilidade ao longo dos anos.
 
 ```{r grafico18, echo=FALSE, warning=FALSE}
-
-tx_recorr <- readRDS("../data_raw/tabela_recorr_2021_total.rds")
 
 tx_recorr |>
   ggplot(aes(x = ano, y = taxa_rec)) +
@@ -929,7 +1005,7 @@ tx_recorr |>
 ```
 
 
-A taxa de recorribilidade geral é de <mark>20%</mark>. Entre os processos originários, a taxa de recorribilidade é de <mark>21%</mark> e entre os processos recursais, <mark>19%</mark>.
+A taxa de recorribilidade geral é de `r text_recor$percent_rec`. Entre os processos originários, a taxa de recorribilidade é de `r perc[[1,2]]`% e entre os processos recursais, `r perc[[2,2]]`%.
 
 ## Produtividade
 
@@ -952,7 +1028,7 @@ colnames(tabela_rec_baixa_total) <- c("Ano","Recebimento","Baixa","Taxa de produ
 ```
 
 
-A taxa de produtividade foi de <mark>104,4%</mark>. O acervo final de 2020, observado em `r data_tramitacao`, foi cerca de <mark>16%</mark> menor do que o acervo final de 2019.
+A taxa de produtividade foi de `r produtiv$taxa_produtiv`. O acervo final de `r ano_atual`, observado em `r data_tramitacao`, foi aproximadamente cerca de `r text_a2_2[[1,8]]` o acervo final de `r ano_anterior`.
 Esse resultado demonstra o esforço do STF em tornar o processo de julgamento mais célere. Por fim, o gráfico a seguir mostra a quantidade de processos baixados, recebidos e o acervo final por ano.
 
 ```{r grafico19, echo=FALSE, warning=FALSE}
@@ -1026,7 +1102,7 @@ no Plenário Virtual por ano:
 # Ajuda Euler
 ```
 
-<center><span class="border-highlight"><b>Gráfico 20 </center> </span></b>
+<center><span class="border-highlight"><b>Gráfico 20 - Euler </center> </span></b>
 
 Houve queda no total de temas julgados no plenário virtual e nos temas com repercussão geral reconhecida. Apenas os temas com repercussão geral negada tiveram expressivo aumento. O próximo gráfico mostra o total de temas julgados por ano:
 
@@ -1035,7 +1111,7 @@ Houve queda no total de temas julgados no plenário virtual e nos temas com repe
 # PENDENTE!
 # Ajuda Euler
 ```
-<center><span class="border-highlight"><b>Gráfico 21 </center> </span></b>
+<center><span class="border-highlight"><b>Gráfico 21 - Euler </center> </span></b>
 
 Houve um forte aumento no total de temas julgados e no total de temas com mérito julgado. O total de temas com reafirmação de jurisprudência também aumentou, porém de modo mais tímido.
 
@@ -1056,6 +1132,6 @@ Em parceria com o STJ e o CNJ, a Presidência do STF realizou, nas instâncias d
 O julgamento de mérito de temas de repercussão geral tem como consequência a imediata liberação para julgamento dos processos correlatos que tenham sido sobrestados nos tribunais de origem e também no próprio STF. Mais de <mark>187</mark> mil processos foram liberados para as instâncias de origem em 2020, como bem mostra a tabela a seguir:
 
 
-<center><span class="border-highlight"><b>Tabela 11 </center> </span></b>
+<center><span class="border-highlight"><b>Tabela 11 - Euler </center> </span></b>
 
 

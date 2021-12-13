@@ -15,4 +15,5 @@ prov_geral <- provimento |>
 
 # saveRDS(prov_geral, file = "data_raw/prov_geral.rds")
 
-# Falta o gráfico!
+
+# Falta o gráfico! (EULER)

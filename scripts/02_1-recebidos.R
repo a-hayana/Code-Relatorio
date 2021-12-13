@@ -166,18 +166,18 @@ tabela_rec_baixa_total <- rbind(receb_baixa_hist,rec_baixa_2021)
 # Tabela 12: Processos Recebidos ------------------------------------------
 # Tabela 17: Recursos Recebidos por Classe --------------------------------
 # Tabela 19: Processos Originários por ano --------------------------------
-View(tabela_rec_total)
+# View(tabela_rec_total)
 # saveRDS(tabela_rec_total,  file = "data_raw/tabela_rec_total.rds")
 
 # Tabela 21: Recebimento de Processos Originários por Classe --------------
-View(tab_total_class)
+# View(tab_total_class)
 # saveRDS(tab_total_class,  file = "data_raw/tab_total_class.rds")
 
 # Tabela 30: Recebimento e Baixa de Processos -----------------------------
-View(tabela_rec_baixa_total)
+# View(tabela_rec_baixa_total)
 #saveRDS(tabela_rec_baixa_total, file = "data_raw/tabela_rec_baixa_total.rds")
 
 
 # Tabela 18: Percentual - Processos Recebidos por Classe - 2021 -----------
-View(grafico_classes)
+# View(grafico_classes)
 

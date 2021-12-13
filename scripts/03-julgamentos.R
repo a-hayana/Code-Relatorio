@@ -37,7 +37,7 @@ decisoes2021 |>
 decisoes2021  <-  decisoes2021 |>
   filter(!is.na(tipo_decisao))
 
-
+# saveRDS(decisoes2021, file = "data_raw/decisoes2021.rds")
 
 # Organização da tabela histórica - Decisões por Espécie --------------------------------------
 
@@ -225,25 +225,70 @@ tab_plen_2021 <- c(class_criminais,
 tabela_final_plen <- cbind(tab_pleno_hist,"2021" = tab_plen_2021)
 
 
+# Tabela - Texto monocráticas/colegiadas por presid/ministros -------------
+
+text_total <-  decisoes2021 |>
+  # group_by(tipo_decisao) |>
+   filter(tipo_decisao == "MONOCRÁTICA") |>
+   summarise(n = sum(qtd_ocorrencias_processuais))
+
+presid_mono <-  decisoes2021 |>
+    group_by(orgao_julgador) |>
+    filter(tipo_decisao == "MONOCRÁTICA") |>
+    filter(orgao_julgador == "PRESIDÊNCIA") |>
+    summarise(n = sum(qtd_ocorrencias_processuais))
+
+percent_pres_mono = round((presid_mono$n/text_total$n)*100,2)
+
+
+col_text <-  decisoes2021 |>
+  group_by(orgao_julgador) |>
+  filter(tipo_decisao == "MONOCRÁTICA") |>
+  filter(orgao_julgador == "PRESIDÊNCIA") |>
+  summarise(n = sum(qtd_ocorrencias_processuais))
+
+percent_pres_mono = round((presid_mono$n/text_total$n)*100,2)
+
+
+# Colegiadas
+text_total_col <-  dec_org_julg2 |>
+  group_by(orgao_julgador2) |>
+  filter(tipo_decisao == "COLEGIADA") |>
+  mutate(orgao_julgador3 = if_else(orgao_julgador2 %in% c("Primeira Turma","Segunda Turma"), "Turmas",
+                                   if_else(orgao_julgador2 %in% c("Plenário","Plenário Virtual - RG"), "Plenário", orgao_julgador2))) |>
+  relocate(orgao_julgador3, .after = orgao_julgador2)
+
+# saveRDS(text_total_col, file = "data_raw/text_total_col.rds")
+
+# Total - Por órgão - Colegiado
+text_orgao3 <- text_total_col |>
+  group_by(orgao_julgador3) |>
+  filter(tipo_decisao == "COLEGIADA") |>
+  filter(orgao_julgador3 %in% c("Turmas", "Plenário")) |>
+  summarise(n = sum(qtd_ocorrencias_processuais)) |>
+  mutate(percent_orgao3 = round(n/sum(n),4)*100)
+
+
+
 
 # Resumo ------------------------------------------------------------------
 
 # Tabela 23: Quantitativo de Decisões por Espécie -------------------------
-View(tabela_dec_especies_2021)
-# saveRDS(tabela_dec_especies_2021, "tabela_dec_especies_2021.rds")
+# View(tabela_dec_especies_2021)
+# saveRDS(tabela_dec_especies_2021, file = "data_raw/tabela_dec_especies_2021.rds")
 
 
 # Tabela 22: Decisões - Finais e Total ------------------------------------
 # Tabela 24: Quantitativo de Decisões Monocráticas ------------------------
 # Tabela 25: Quantitativo de Decisões Colegiadas --------------------------
-View(tabela_dec)
-# saveRDS(tabela_dec, "tabela_dec.rds")
+# View(tabela_dec)
+# saveRDS(tabela_dec, file = "data_raw/tabela_dec.rds")
 
 # Tabela 26: Quantitativo de Decisões por Orgão Julgador ------------------
-View(tabela_final_orgao)
-# saveRDS(tabela_final_orgao, "tabela_final_orgao.rds")
+# View(tabela_final_orgao)
+# saveRDS(tabela_final_orgao, file = "data_raw/tabela_final_orgao.rds")
 
 
 # Tabela 28: Quantitativo de Decisões do Plenário por Classe --------------
-View(tabela_final_plen)
-# saveRDS(tabela_final_plen, "tabela_final_plen.rds")
+# View(tabela_final_plen)
+# saveRDS(tabela_final_plen, file = "data_raw/tabela_final_plen.rds")
