@@ -41,7 +41,6 @@ library(janitor)
 
 # Resultados da Prestação Jurisdicional
 
-<br>
 
 ```{r text, warning=TRUE, include=FALSE}
 # Inserir periodo da análise
@@ -746,10 +745,10 @@ Conforme relatório sobre a taxa de provimento, as decisões dos tribunais de or
 ```
 <center><span class="border-highlight"><b>Gráfico 12 - Euler </center> </span></b>
 
-Dos recursos apresentados à Presidência aproximadamente <mark>90%</mark> dos óbices
-eram relacionados aos seguintes motivos:
+<!-- [TABELA RETIRADA] - SOMENTE VERSAO FINAL - Dos recursos apresentados à Presidência aproximadamente <mark>90%</mark> dos óbices -->
+<!-- eram relacionados aos seguintes motivos: -->
 
-<center><span class="border-highlight"><b>Tabela 3 - Motivo inaptidão - Euler </center> </span></b>
+<!-- <center><span class="border-highlight"><b>Tabela 3 - Motivo inaptidão - Euler </center> </span></b> -->
 
 ### Recebimento de Originários 
 
@@ -1071,7 +1070,7 @@ receb_baixa |>
 
 # Relatório da Repercussão Geral
 
-<center><span class="border-highlight"><b>Tabela 10 - Euler </center> </span></b>
+<!-- [TABELA RETIRADA] - SOMENTE VERSAO FINAL <center><span class="border-highlight"><b>Tabela 10 - Euler </center> </span></b> -->
 
 Dos <mark>52</mark> novos temas apreciados no plenário virtual, <mark>30</mark> tiveram repercussão geral reconhecida e <mark>22</mark> tiveram repercussão geral não reconhecida. Dos <mark>134</mark> temas julgados, <mark>125</mark> tiveram mérito julgado e 9 tiveram reafirmação de jurisprudência, representando um aumento de aproximadamente <mark>14%</mark> em relação a 2019.
 
@@ -1104,7 +1103,7 @@ no Plenário Virtual por ano:
 
 <center><span class="border-highlight"><b>Gráfico 20 - Euler </center> </span></b>
 
-Houve queda no total de temas julgados no plenário virtual e nos temas com repercussão geral reconhecida. Apenas os temas com repercussão geral negada tiveram expressivo aumento. O próximo gráfico mostra o total de temas julgados por ano:
+Houve <mark>queda no total de temas julgados no plenário virtual e nos temas com repercussão geral reconhecida. Apenas os temas com repercussão geral negada tiveram expressivo aumento.</mark> O próximo gráfico mostra o total de temas julgados por ano:
 
 ```{r grafico21}
 
@@ -1113,7 +1112,7 @@ Houve queda no total de temas julgados no plenário virtual e nos temas com repe
 ```
 <center><span class="border-highlight"><b>Gráfico 21 - Euler </center> </span></b>
 
-Houve um forte aumento no total de temas julgados e no total de temas com mérito julgado. O total de temas com reafirmação de jurisprudência também aumentou, porém de modo mais tímido.
+Houve um <mark>forte aumento no total de temas julgados e no total de temas com mérito julgado. O total de temas com reafirmação de jurisprudência também aumentou, porém de modo mais tímido.</mark>
 
 Ressalta-se que o NURG assessora a Presidência na análise dos recursos para aplicação da sistemática da repercussão geral. Compete ainda ao núcleo: 
 
@@ -1129,7 +1128,7 @@ Em parceria com o STJ e o CNJ, a Presidência do STF realizou, nas instâncias d
 
 ## Teses firmadas e liberação de processos em todo o País
 
-O julgamento de mérito de temas de repercussão geral tem como consequência a imediata liberação para julgamento dos processos correlatos que tenham sido sobrestados nos tribunais de origem e também no próprio STF. Mais de <mark>187</mark> mil processos foram liberados para as instâncias de origem em 2020, como bem mostra a tabela a seguir:
+O julgamento de mérito de temas de repercussão geral tem como consequência a imediata liberação para julgamento dos processos correlatos que tenham sido sobrestados nos tribunais de origem e também no próprio STF. Mais de <mark>187</mark> mil processos foram liberados para as instâncias de origem em `r ano_atual``, como bem mostra a tabela a seguir:
 
 
 <center><span class="border-highlight"><b>Tabela 11 - Euler </center> </span></b>
