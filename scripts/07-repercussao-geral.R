@@ -17,11 +17,13 @@ tab_rg_view <- janitor::clean_names(tab_rg)
 tab_rg_view <- tab_rg_view |>
   filter(!is.na(link_leading_case))
 
+tab_rg_tabela <- tab_rg_view
+
 # tb andamento
-tb_andamento <-
-  tab_rg_view |>
-  group_by(andamento) |>
-  summarise(n = sum(qtd_processos))
+# tb_andamento <-
+#   tab_rg_view |>
+#   group_by(andamento) |>
+#   summarise(n = sum(qtd_processos))
 
 
 # Poderia usar um casewhen, mas resolvi usar o excel para auxiliar na classifica??o
@@ -162,3 +164,36 @@ tab_rg_final |>
         legend.title = element_blank(),
         axis.ticks.y=element_blank()
   )
+
+
+## Tabela de Mérito Julgado
+
+tab_rg_final <-
+tab_rg_tabela |>
+  filter(andamento %in% c('Julgado mérito de tema com repercussão geral',
+                          'Reconhecida a repercussão geral e julgado o mérito com reafirmação de jurisprudência no PV')) |>
+  relocate(andamento, .after = 'link_processo') |>
+  select(-qtd_processos)
+
+
+# Sobrestados
+# https://paineis.cnj.jus.br/QvAJAXZfc/opendoc.htm?document=qvw_l%2FPainelCNJ.qvw&host=QVS%40neodimio03&anonymous=true&sheet=STF
+
+file = "dados/sobrestados.xlsx"
+sobrestados <- readxl::read_excel(path = file) |>
+  janitor::clean_names() |>
+  mutate(tema = stringr::str_remove(tema, pattern = "STF RG "))
+
+
+# Juntar as duas tabelas
+tab_rg_final |>
+  left_join(sobrestados, by = c("link_leading_case" = "tema")) |>
+  select(-num_tema) |>
+  mutate(data_andamento = lubridate::as_date(data_andamento, origin = "1899-12-30")) |>
+  arrange(desc(qtd_processos)) |>
+  rename(tema = link_leading_case,
+         data = data_andamento,
+         relator = relator_atual,
+         processo = link_processo) |>
+  janitor::adorn_totals('row') |>
+  DT::datatable(options(pageLength = 60))
