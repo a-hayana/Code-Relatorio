@@ -47,7 +47,7 @@ library(janitor)
 ano_atual <- 2021
 ano_anterior <- ano_atual-1
 # inserir parcial 
-data_tramitacao <- "01/01/2021"
+data_tramitacao <- "01/12/2021"
 
 # Leitura RDS -------------------------------------------------
 
@@ -153,6 +153,23 @@ decisoes <- tabela_dec |>
   filter(ano %in% ano_atual) |> 
   mutate(perc_mono = paste0(round((decisoes_monocraticas/total_decisoes*100),2),"%")) |>  
   mutate(perc_col = paste0(round((decisoes_colegiadas/total_decisoes)*100,2), "%")) 
+
+
+# Decisões colegiadas - em relação ao ano anterior
+decisoes_col <- tabela_dec |> 
+  select(ano,decisoes_colegiadas) |> 
+  filter(ano %in% c(ano_atual,ano_anterior)) 
+
+perc_colegiadas <- round((decisoes_col$decisoes_colegiadas[2]-decisoes_col$decisoes_colegiadas[1])/decisoes_col$decisoes_colegiadas[1]*100,2)
+
+text_colegiadas <- tabela_dec |> 
+  select(ano,decisoes_colegiadas) |> 
+  filter(ano %in% ano_atual) |> 
+  mutate(col1 = if_else(perc_colegiadas < 0, "Houve uma diminuição de ", "Houve um aumento de ")) |> 
+  mutate(col2 = if_else(perc_colegiadas < 0, ".", ", reforçando o princípio da Colegialidade.")) |> 
+  mutate(col1 = paste0(col1, abs(perc_colegiadas), "%", " nas decisões colegiadas", col2))
+
+
 
 # Baixa - Selecionando as variáveis desejadas
 baixas <- tabela_rec_baixa_total |> 
@@ -349,7 +366,7 @@ tabela_acervo  |>
             position = position_stack(vjust = 1.1))+
   ggtitle("Acervo processual") +
   geom_area(fill = 4, color = 'grey', alpha = 0.5)+
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
   #coord_cartesian(ylim = c(0, 60000))+
@@ -379,7 +396,7 @@ acervo_orig_rec |>
              fill= fct_reorder(classificacao, qtd, .desc = TRUE)), position = "identity")+
   ggtitle("Originários e recursais") +
   geom_area(color = 'grey') +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
   theme(axis.title.y=element_blank(),
@@ -407,7 +424,7 @@ acervo_autuacao |>
   geom_bar(aes(fill = autuacao_levels), color = 'black', stat = "identity",show.legend = FALSE) +
   geom_label(aes(label=n))+
   ggtitle("Acervo por ano de autuação") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
   theme(axis.title.x=element_blank(),
@@ -456,7 +473,7 @@ acervo_eletro_fis |>
   geom_line(aes(y = qtd, shape=tipo, fill = factor(tipo), colour=tipo)) +
   geom_label(aes(label = paste0(round(qtd,3)*100,"%"))) +
   ggtitle("Acervo Físico x Eletrônico") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
   coord_cartesian(ylim = c(-0.2, 1.2))+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
@@ -540,7 +557,7 @@ percent_total |>
   geom_point() + 
   geom_line(aes(y = qtd, shape=destino, fill = factor(destino), colour=destino)) +
   geom_label_repel(aes(label = paste0(round(qtd,3),"%")), vjust = 0.5, hjust = 0.2) +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.") +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
   coord_cartesian(ylim = c(25, 73))+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
@@ -575,7 +592,7 @@ qtd_total |>
   geom_point() + 
   geom_line(aes(y = qtd, shape=destino, fill = factor(destino), colour=destino)) +
   geom_label_repel(aes(label = qtd), hjust = 0.5, size = 3) +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.") +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
    scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
     theme(axis.title.y=element_blank(),
@@ -621,7 +638,7 @@ recursal_pres_min |>
   geom_point() + 
   geom_line(aes(y = qtd, shape=destino, fill = factor(destino), colour=destino)) +
   geom_label(aes(label = paste0(round(qtd,3),"%"))) +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.") +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
  # coord_cartesian(ylim = c(25, 73))+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
@@ -657,7 +674,7 @@ qtd_recur_pres_min |>
   geom_point() + 
   geom_line(aes(y = qtd, shape=destino, fill = factor(destino), colour=destino)) +
   geom_label_repel(aes(label = qtd), vjust = 0.5, size = 3) +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.") +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
    scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
     theme(axis.title.y=element_blank(),
@@ -694,7 +711,7 @@ recebidos_recursais |>
              fill= fct_reorder(recursais, qtd, .desc = TRUE)), position = "identity")+
   ggtitle("Recebidos - ARE, AI e RE") +
   geom_area(color = 'grey') +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
   theme(axis.title.y=element_blank(),
@@ -717,7 +734,7 @@ dados <- dados %>%
 
 ggplot(dados, aes(x = Ano, y = Proporção, fill = Processos)) +
   geom_col() +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
   geom_text(aes(label = paste0(Proporção, "%")),
             position = position_stack(vjust = 0.5)) +
   scale_fill_brewer(palette = "Blues") +
@@ -738,12 +755,40 @@ ggplot(dados, aes(x = Ano, y = Proporção, fill = Processos)) +
 
 Conforme relatório sobre a taxa de provimento, as decisões dos tribunais de origem são confirmadas pelo Supremo em `r  as.character(prov_last_year[[2]])`% dos casos. A taxa de provimento por classes é de `r prov_last_year[[4]]`% para ARE e `r as.character(prov_last_year[[5]])`% para RE.
 
-```{r grafico12, echo=FALSE, warning=TRUE}
+```{r grafico12, echo=FALSE, warning=FALSE}
 
-# FALTANDO!
+names_provimento <- prov_geral
+
+colnames(names_provimento)[2] <- "Taxa de provimento"
+colnames(names_provimento)[3] <- "Taxa de não provimento"
+
+graph_provimento <-
+  names_provimento |> 
+  select(1:3) |> 
+  pivot_longer(
+    cols = 2:3,
+    names_to = "tipo",
+    values_to = "qtd"
+  )
+
+graph_provimento |> 
+  ggplot(aes(x = ano, y = qtd, group=factor(tipo))) +
+  geom_point() + 
+  geom_line(aes(y = qtd, shape=tipo, fill = factor(tipo), colour=tipo)) +
+  geom_label(aes(label = paste0(round(qtd,2),"%"),vjust = -1)) +
+  ggtitle("Taxa de provimento de decisões") +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  coord_cartesian(ylim = c(-2, 110))+
+  scale_x_continuous(breaks = 2010:2021) +
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.title = element_blank(),
+        axis.ticks.y=element_blank())
 
 ```
-<center><span class="border-highlight"><b>Gráfico 12 - Euler </center> </span></b>
+
 
 <!-- [TABELA RETIRADA] - SOMENTE VERSAO FINAL - Dos recursos apresentados à Presidência aproximadamente <mark>90%</mark> dos óbices -->
 <!-- eram relacionados aos seguintes motivos: -->
@@ -797,7 +842,7 @@ dados <- dados %>%
 
 ggplot(dados, aes(x = Ano, y = Proporção, fill = Processos)) +
   geom_col() +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
   geom_text(aes(label = paste0(Proporção, "%")),
             position = position_stack(vjust = 0.5)) +
   scale_fill_brewer(palette = "Blues") +
@@ -835,16 +880,44 @@ colnames(tab_total_class) <- c("Classe originária", "Grupo","2016","2017","2018
 
 ## Julgamentos 
 
-O julgamento do processo é identificado pela decisão final, a qual extingue o processo ainda que o mérito da causa não seja apreciado. É o que ocorre, por exemplo, nas decisões de não conhecimento, de prejudicialidade, de homologação de desistência e de negativa de seguimento. Se houver decisão final no processo e decurso do prazo processual sem interposição de recurso, ocorrerá o trânsito em julgado da decisão e, subsequentemente, a baixa do processo. No mais, destaca-se que é possível a cumulação de mais de uma decisão em cada feito. O
-gráfico a seguir mostra a quantidade de decisões e a quantidade de decisões finais.
+O julgamento do processo é identificado pela decisão final, a qual extingue o processo ainda que o mérito da causa não seja apreciado. É o que ocorre, por exemplo, nas decisões de não conhecimento, de prejudicialidade, de homologação de desistência e de negativa de seguimento. Se houver decisão final no processo e decurso do prazo processual sem interposição de recurso, ocorrerá o trânsito em julgado da decisão e, subsequentemente, a baixa do processo. No mais, destaca-se que é possível a cumulação de mais de uma decisão em cada feito. O gráfico a seguir mostra a quantidade de decisões e a quantidade de decisões finais.
 
-```{r grafico15, warning=TRUE}
+```{r grafico15, echo=FALSE, warning=FALSE}
 
-# PENDENTE! 
+names_graph_decisoes <- tabela_dec
+
+colnames(names_graph_decisoes)[2] <- "Decisão Final"
+colnames(names_graph_decisoes)[3] <- "Total de decisões"
+
+
+graph_decisoes <-
+  names_graph_decisoes |> 
+  select(1:3) |> 
+  pivot_longer(
+    cols = 2:3,
+    names_to = "decisoes",
+    values_to = "qtd"
+  )
+
+
+graph_decisoes |> 
+  ggplot(aes(x = ano, y = qtd, 
+             fill= fct_reorder(decisoes, qtd, .desc = TRUE)), position = "identity")+
+  geom_area(color = 'grey') +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight()+
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.title = element_blank(),
+        axis.ticks.y=element_blank()) +
+  geom_text(aes(label = qtd),
+            position = position_stack(vjust = 1.1), size=3)
+
 
 ```
 
-<center><span class="border-highlight"><b>Gráfico 15 - Euler </center> </span></b>
+
 
 Além da decisão final, há outras espécies em menor quantidade, conforme apresentado na tabela seguinte com os respectivos quantitativos.
 
@@ -867,7 +940,7 @@ colnames(tabela_dec_especies_2021)[1] <- "Decisões por espécie"
 ```
 
 
-Ademais, as decisões podem ser classificadas em monocráticas (`r as.character(decisoes[[6]])`) e colegiadas (`r as.character(decisoes[[7]])`). Entre as monocráticas, `r as.character(100-percent_pres_mono)`% foram decisões proferidas por Ministros e `r as.character(percent_pres_mono)`% pelo Ministro Presidente. Entre as decisões colegiadas, cerca de `r text_orgao3$percent_orgao3[[2]]`% foram proferidas pelas turmas e `r text_orgao3$percent_orgao3[[1]]`% pelo Plenário. <mark>Houve um aumento de 2% nas decisões colegiadas, reforçando o princípio da Colegialidade.</mark> Os gráficos a seguir mostram o quantitativo de decisões monocráticas e colegiadas por ano.
+Ademais, as decisões podem ser classificadas em monocráticas (`r as.character(decisoes[[6]])`) e colegiadas (`r as.character(decisoes[[7]])`). Entre as monocráticas, `r as.character(100-percent_pres_mono)`% foram decisões proferidas por Ministros e `r as.character(percent_pres_mono)`% pelo Ministro Presidente. Entre as decisões colegiadas, cerca de `r text_orgao3$percent_orgao3[[2]]`% foram proferidas pelas turmas e `r text_orgao3$percent_orgao3[[1]]`% pelo Plenário. `r text_colegiadas$col1` Os gráficos a seguir mostram o quantitativo de decisões monocráticas e colegiadas por ano.
 
 
 ```{r grafico16, echo=FALSE, warning=FALSE, fig.height=4, fig.width=7}
@@ -977,10 +1050,7 @@ Foram realizadas <mark>77 sessões</mark> no Plenário presenciais, sendo <mark>
 
 Em `r ano_atual`, foram publicados <mark>18.188</mark> acórdãos.
 
-Em 2019, a Presidência passou a divulgar a pauta dos julgamentos agendados para o semestre seguinte, em primazia da previsibilidade. Com isso, a sociedade como um todo pôde mobilizar-se em torno dos temas
-pautados, instaurando-se o debate democrático que deve preceder à análise de questões de grande relevância. Acesse a pauta pelo QRCode.
 
-<center><span class="border-highlight"><b>QRCode </center> </span></b>
 
 ## Taxa de recorribilidade
 
@@ -993,7 +1063,7 @@ tx_recorr |>
   geom_line() +
   geom_label(aes(label = paste0(taxa_rec, "%")))+
   ggtitle("Taxa de recorribilidade") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.")+
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
   coord_cartesian(ylim = c(10, 50))+
@@ -1054,8 +1124,8 @@ receb_baixa |>
     shape = destino
   )) +
   geom_line(aes(colour = destino)) +
-  geom_label(aes(label = qtd), size = 3) +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/01/2021 e Relatório de Atividades 2021.") +
+  geom_label(aes(label = qtd), size=2.5) +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
   theme(
