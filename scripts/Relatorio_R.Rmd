@@ -66,6 +66,9 @@ tx_recorr <- readRDS("../data_raw/tabela_recorr_2021_total.rds")
 recor_table_tipo <- readRDS("../data_raw/recor_table_tipo.rds")
 decisoes_tipo_r <- readRDS("../data_raw/decisoes_tipo_r.rds")
 text_total_col <- readRDS("../data_raw/text_total_col.rds")
+tab_rg_final_1 <- readRDS(file = "../data_raw/tab_rg_final_1.rds")
+tab_rg_final_2 <- readRDS(file="../data_raw/tab_rg_final_2.rds")
+tab_rg_final_3 <- readRDS(file = "../data_raw/tab_rg_final_3.rds")
 
 # Manipulações - texto ----------------------------------------
 
@@ -344,6 +347,7 @@ text_orgao3 <- text_total_col |>
   summarise(n = sum(qtd_ocorrencias_processuais)) |> 
   mutate(percent_orgao3 = round(n/sum(n),4)*100)
   
+
 ```
 
 
@@ -774,7 +778,7 @@ graph_provimento <-
 graph_provimento |> 
   ggplot(aes(x = ano, y = qtd, group=factor(tipo))) +
   geom_point() + 
-  geom_line(aes(y = qtd, shape=tipo, fill = factor(tipo), colour=tipo)) +
+  geom_line(aes(y = qtd, shape=tipo, fill = factor(tipo), colour=tipo), size=0.8) +
   geom_label(aes(label = paste0(round(qtd,2),"%"),vjust = -1)) +
   ggtitle("Taxa de provimento de decisões") +
   labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
@@ -876,7 +880,6 @@ colnames(tab_total_class) <- c("Classe originária", "Grupo","2016","2017","2018
 
 ```
 
-<mark>Houve aumento de mais de 50% de processos de Controle Concentrado, com destaque para as classes ADI (+46%) e ADPF (+64%). Além disso, houve expressivo aumento de HC, com aumento de 21% no recebimento de processos. Estes aumentos podem estar relacionados com contexto da pandemia COVID-19.</mark> Além disso, mais de <mark>90%</mark> dos processos pertencem às classes Habeas Corpus, Reclamação e Recurso em Habeas Corpus.
 
 ## Julgamentos 
 
@@ -1044,9 +1047,7 @@ Os números constantes da tabela a seguir demonstram a importância da adoção 
 
 <center><span class="border-highlight"><b>Tabela 8 - Euler </center> </span></b>
 
-São os quantitativos de decisões em sessões virtuais por órgão julgador, em `r ano_atual`.
-
-Foram realizadas <mark>77 sessões</mark> no Plenário presenciais, sendo <mark>37 ordinárias</mark> e <mark>40 extraordinárias</mark>, além de <mark>40 sessões no Plenário virtual</mark>. Ainda foram realizadas <mark>3 sessões solenes: Abertura do Ano Judiciário 2020; posse dos Ministros Luiz Fux e Rosa Weber na Presidência e Vice-Presidência do STF e CNJ; e posse do Dr. Kassio Nunes Marques no cargo de Ministro do Supremo Tribunal Federal.</mark>
+São os quantitativos de decisões em sessões virtuais por órgão julgador, em `r ano_atual`^[Informações sobre o quantitativo de sessões virtuais, presenciais e sessões solenes podem ser obtidos no relatório da Assessoria do Plenário.].
 
 Em `r ano_atual`, foram publicados <mark>18.188</mark> acórdãos.
 
@@ -1140,9 +1141,25 @@ receb_baixa |>
 
 # Relatório da Repercussão Geral
 
-<!-- [TABELA RETIRADA] - SOMENTE VERSAO FINAL <center><span class="border-highlight"><b>Tabela 10 - Euler </center> </span></b> -->
+```{r text_rg, warning=FALSE, include=FALSE}
 
-Dos <mark>52</mark> novos temas apreciados no plenário virtual, <mark>30</mark> tiveram repercussão geral reconhecida e <mark>22</mark> tiveram repercussão geral não reconhecida. Dos <mark>134</mark> temas julgados, <mark>125</mark> tiveram mérito julgado e 9 tiveram reafirmação de jurisprudência, representando um aumento de aproximadamente <mark>14%</mark> em relação a 2019.
+# Novos temas apreciados no Plenário Virtual 
+ano_atual_text <-  ncol(tab_rg_final_1)
+rg_text <- tab_rg_final_1 |> 
+      select(RG,ano_atual_text) |> 
+      filter(RG %in% c("Repercussão Geral Reconhecida", "Repercussão Geral Negada")) |> 
+      janitor::adorn_totals()
+
+# Temas julgados 
+julg_text <- tab_rg_final_2 |> 
+  select(1,ano_atual_text) |> 
+  filter(RG %in% c("Mérito Julgado", "Reafirmação de Jurisprudência")) |> 
+  janitor::adorn_totals()
+
+```
+
+Dos `r as.character(rg_text[[3,2]])` novos temas apreciados no plenário virtual, `r as.character(rg_text[[1,2]])` tiveram repercussão geral reconhecida e `r as.character(rg_text[[2,2]])` tiveram repercussão geral não reconhecida. Dos `r as.character(julg_text[[3,2]])` temas julgados, `r as.character(julg_text[[1,2]])` tiveram mérito julgado e `r as.character(julg_text[[2,2]])` tiveram reafirmação de jurisprudência. 
+
 
 ## Repercussão Geral
 
@@ -1159,30 +1176,66 @@ Finalidades:
     -- tenham relevância social, política, econômica ou jurídica;<br> --
     transcendam os interesses subjetivos da causa;
 
--   Uniformizar a interpretação constitucional, de modo a desonerar o
-    STF de decidir múltiplos casos sobre a mesma matéria.
+-   Uniformizar a interpretação constitucional, de modo a desonerar o STF de decidir múltiplos casos sobre a mesma matéria.
 
-O gráfico a seguir mostra a evolução da quantidade de temas apreciados
-no Plenário Virtual por ano:
+O gráfico a seguir mostra a evolução da quantidade de temas apreciados no Plenário Virtual por ano:
 
-```{r grafico20}
+```{r grafico20, echo=FALSE, warning=FALSE}
 
-# PENDENTE!
-# Ajuda Euler
+# Gráfico
+tab_rg_final_1 |>
+  pivot_longer(
+    cols = `2016`:`2021`,
+    names_to = 'ano',
+    values_to = 'qtd'
+  ) |>
+  filter(RG %in% c('Repercussão Geral Negada', 'Repercussão Geral Reconhecida')) |>
+  ggplot(aes(x = ano, y = qtd, group = RG, shape = RG)) +
+  geom_line(aes(colour=RG), size=1) +
+  geom_label(aes(label = qtd), size = 3) +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight() +
+  theme(legend.position="bottom",
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.title = element_blank(),
+        axis.ticks.y=element_blank()
+  )
+
+
 ```
 
-<center><span class="border-highlight"><b>Gráfico 20 - Euler </center> </span></b>
+O próximo gráfico mostra o total de temas julgados por ano:
 
-Houve <mark>queda no total de temas julgados no plenário virtual e nos temas com repercussão geral reconhecida. Apenas os temas com repercussão geral negada tiveram expressivo aumento.</mark> O próximo gráfico mostra o total de temas julgados por ano:
+```{r grafico21, echo=FALSE, warning=FALSE}
 
-```{r grafico21}
+# Gráfico de Mérito e Reafirmação da Jurisprudência
+tab_rg_final_2 |>
+  pivot_longer(
+    cols = `2016`:`2021`,
+    names_to = 'ano',
+    values_to = 'qtd'
+  ) |>
+  filter(RG %in% c('Mérito Julgado', 'Reafirmação de Jurisprudência')) |>
+  ggplot(aes(x = ano, y = qtd, group = RG, shape = RG)) +
+  geom_line(aes(colour=RG), size=1) +
+  geom_label(aes(label = qtd), size = 3) +
+  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
+  scale_fill_brewer(palette = "Blues") +
+  ggthemes::theme_fivethirtyeight() +
+  theme(legend.position="bottom",
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        legend.title = element_blank(),
+        axis.ticks.y=element_blank()
+  )
 
-# PENDENTE!
-# Ajuda Euler
+
 ```
-<center><span class="border-highlight"><b>Gráfico 21 - Euler </center> </span></b>
 
-Houve um <mark>forte aumento no total de temas julgados e no total de temas com mérito julgado. O total de temas com reafirmação de jurisprudência também aumentou, porém de modo mais tímido.</mark>
+<br>
+
 
 Ressalta-se que o NURG assessora a Presidência na análise dos recursos para aplicação da sistemática da repercussão geral. Compete ainda ao núcleo: 
 
@@ -1198,9 +1251,49 @@ Em parceria com o STJ e o CNJ, a Presidência do STF realizou, nas instâncias d
 
 ## Teses firmadas e liberação de processos em todo o País
 
-O julgamento de mérito de temas de repercussão geral tem como consequência a imediata liberação para julgamento dos processos correlatos que tenham sido sobrestados nos tribunais de origem e também no próprio STF. Mais de <mark>187</mark> mil processos foram liberados para as instâncias de origem em `r ano_atual``, como bem mostra a tabela a seguir:
+```{r tabela11, echo=FALSE, warning=FALSE}
+
+file = "../dados/sobrestados.xlsx"
+ 
+sobrestados <- readxl::read_excel(path = file) |>
+  janitor::clean_names() |>
+  mutate(tema = stringr::str_remove(tema, pattern = "STF RG "))
 
 
-<center><span class="border-highlight"><b>Tabela 11 - Euler </center> </span></b>
+# Juntar as duas tabelas
+table_final <- tab_rg_final_3 |>
+  left_join(sobrestados, by = c("link_leading_case" = "tema")) |>
+  select(-num_tema) |>
+  mutate(data_andamento = lubridate::as_date(data_andamento, origin = "1899-12-30")) |>
+  arrange(desc(qtd_processos)) |>
+  rename(tema = link_leading_case,
+         data = data_andamento,
+         relator = relator_atual,
+         processo = link_processo) |>
+  janitor::adorn_totals('row')
+
+
+# Texto - Quantidade total
+total_table_final <- table_final |> 
+  select(tema,qtd_processos) |> 
+  filter(tema == "Total")
+
+```
+
+
+O julgamento de mérito de temas de repercussão geral tem como consequência a imediata liberação para julgamento dos processos correlatos que tenham sido sobrestados nos tribunais de origem e também no próprio STF. Mais de `r as.character(total_table_final[[2]])` processos foram liberados para as instâncias de origem em `r ano_atual`, como bem mostra a tabela a seguir:
+
+```{r tabela12, echo=FALSE, warning=FALSE}
+
+# Criando a tabela final com botões
+DT::datatable(table_final, extensions = 'Buttons', options = list(
+  dom = 'Bfrtip',
+  buttons = c('copy', 'csv', 'excel', 'pdf', 'print','colvis'), pageLength = 60
+)
+)
+
+```
+
+
 
 
