@@ -77,7 +77,7 @@ df_classes <- data.frame(class_names,total_perc)
 df_classes <- df_classes |>
   arrange(desc(total_perc))
 
-# saveRDS(df_classes, file = "data_raw/df_classes.rds")
+saveRDS(df_classes, file = "data_raw/df_classes.rds")
 
 
 
@@ -115,7 +115,7 @@ grafico_classes <- tab_total_class |>
   mutate(percent_classes = round(qtd/sum(qtd),4)*100) #|>
   # janitor::adorn_totals()
 
-# saveRDS(grafico_classes, file = "data_raw/grafico_classes.rds")
+saveRDS(grafico_classes, file = "data_raw/grafico_classes.rds")
 
 
 # Recebimentos e baixa ----------------------------------------------------
@@ -167,15 +167,15 @@ tabela_rec_baixa_total <- rbind(receb_baixa_hist,rec_baixa_2021)
 # Tabela 17: Recursos Recebidos por Classe --------------------------------
 # Tabela 19: Processos Originários por ano --------------------------------
 # View(tabela_rec_total)
-# saveRDS(tabela_rec_total,  file = "data_raw/tabela_rec_total.rds")
+saveRDS(tabela_rec_total,  file = "data_raw/tabela_rec_total.rds")
 
 # Tabela 21: Recebimento de Processos Originários por Classe --------------
 # View(tab_total_class)
-# saveRDS(tab_total_class,  file = "data_raw/tab_total_class.rds")
+saveRDS(tab_total_class,  file = "data_raw/tab_total_class.rds")
 
 # Tabela 30: Recebimento e Baixa de Processos -----------------------------
 # View(tabela_rec_baixa_total)
-#saveRDS(tabela_rec_baixa_total, file = "data_raw/tabela_rec_baixa_total.rds")
+saveRDS(tabela_rec_baixa_total, file = "data_raw/tabela_rec_baixa_total.rds")
 
 
 # Tabela 18: Percentual - Processos Recebidos por Classe - 2021 -----------

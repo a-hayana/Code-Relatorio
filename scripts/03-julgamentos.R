@@ -345,14 +345,14 @@ saveRDS(table_org, file = "data_raw/table_org.rds")
 
 # Tabela 23: Quantitativo de Decisões por Espécie -------------------------
 # View(tabela_dec_especies_2021)
-#saveRDS(tabela_dec_especies_2021, file = "data_raw/tabela_dec_especies_2021.rds")
+saveRDS(tabela_dec_especies_2021, file = "data_raw/tabela_dec_especies_2021.rds")
 
 
 # Tabela 22: Decisões - Finais e Total ------------------------------------
 # Tabela 24: Quantitativo de Decisões Monocráticas ------------------------
 # Tabela 25: Quantitativo de Decisões Colegiadas --------------------------
 # View(tabela_dec)
-#saveRDS(tabela_dec, file = "data_raw/tabela_dec.rds")
+saveRDS(tabela_dec, file = "data_raw/tabela_dec.rds")
 
 # Tabela 26: Quantitativo de Decisões por Orgão Julgador ------------------
 # View(tabela_final_orgao)
@@ -361,4 +361,4 @@ saveRDS(table_org, file = "data_raw/table_org.rds")
 
 # Tabela 28: Quantitativo de Decisões do Plenário por Classe --------------
 # View(tabela_final_plen)
-# saveRDS(tabela_final_plen, file = "data_raw/tabela_final_plen.rds")
+ saveRDS(tabela_final_plen, file = "data_raw/tabela_final_plen.rds")

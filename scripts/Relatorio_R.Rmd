@@ -1,6 +1,6 @@
 ---
 title: "**Relatório da Prestação Jurisdicional 2021**"
-author: "Supremo Tribunal Federal (STF)"
+author: "Análise Estatística/SGE/STF"
 date: "`r format(Sys.Date(), format='%d/%m/%Y')`"
 encoding: "UTF-8"
 output:
@@ -138,9 +138,9 @@ text_a3 <- tabela_acervo |>
    janitor::adorn_percentages("col") |> 
    mutate(n = round(n*100,1))
  
-text_a4 <- acervo_autuacao_pct$n[4]
+text_a4 <- round(acervo_autuacao_pct$n[4]-1)
  
-text_a5 <- sum(acervo_autuacao_pct$n[-1]) 
+text_a5 <- round(sum(acervo_autuacao_pct$n[-1]) ,0)
 
 
 # Recebidos  - Selecionando as variáveis desejadas
@@ -1328,7 +1328,7 @@ O julgamento de mérito de temas de repercussão geral tem como consequência a 
 # Criando a tabela final com botões
 DT::datatable(table_final, extensions = 'Buttons', options = list(
   dom = 'Bfrtip',
-  buttons = c('copy', 'csv', 'excel', 'pdf', 'print','colvis'), pageLength = 60
+  buttons = c('copy', 'csv', 'excel', 'pdf', 'print','colvis'), pageLength = 80
 )
 )
 

@@ -2,14 +2,12 @@ library(dplyr)
 library(tidyverse)
 library(ggplot2)
 
-link = 'dados/repercussao_geral_2021.xlsx'
 
-tab_rg <- readxl::read_excel(link,
-                             col_types = c("numeric", "text", "text",
-                                           "skip", "skip", "text", "skip", "skip",
-                                           "skip", "skip", "skip", "skip", "text",
-                                           "text", "skip", "skip", "numeric",
-                                           "numeric"), skip = 20)
+tab_rg <- readxl::read_excel("dados/repercussao_geral_2021.xlsx",
+                   col_types = c("numeric", "text", "text", "skip", "skip", "text",
+                                 "skip", "skip", "skip", "skip", "skip", "skip", "skip",
+                                 "text", "text", "skip", "skip", "numeric", "numeric"), skip = 22)
+
 
 #View(tab_rg)
 tab_rg_view <- janitor::clean_names(tab_rg)
@@ -37,7 +35,7 @@ tab_rg_tabela <- tab_rg_view
 
 # Salvei a tabela de DE-PARA
 
-#saveRDS(tb_de_para, file="data_raw/tabela_de_para_rg.rds")
+saveRDS(tb_de_para, file="data_raw/tabela_de_para_rg.rds")
 
 tb_de_para <- readRDS(file="data_raw/tabela_de_para_rg.rds")
 
