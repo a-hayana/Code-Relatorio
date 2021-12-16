@@ -46,14 +46,16 @@ library(janitor)
 # Inserir periodo da análise
 ano_atual <- 2021
 ano_anterior <- ano_atual-1
-# inserir parcial 
-data_tramitacao <- "01/12/2021"
+data_tramitacao <- "16/12/2021"
+fonte <- "Fonte: Portal de Informações Gerenciais em 16/12/2021 e Relatório de Atividades 2021."
 
 # Leitura RDS -------------------------------------------------
 
 tabela_acervo <- readRDS("../data_raw/tabela_acervo.rds")
+acervo_autuacao <- readRDS("../data_raw/acervo_autuacao.rds")
 tabela_rec_total <- readRDS("../data_raw/tabela_rec_total.rds")
 decisoes2021 <- readRDS("../data_raw/decisoes2021.rds")
+table_org <- readRDS("../data_raw/table_org.rds")
 tabela_perc_total <- readRDS("../data_raw/tabela_perc_total.rds")
 tabela_text_total <- readRDS("../data_raw/tabela_text_total.rds")
 tabela_dec <- readRDS("../data_raw/tabela_dec.rds")
@@ -65,10 +67,12 @@ prov_geral <- readRDS("../data_raw/prov_geral.rds")
 tx_recorr <- readRDS("../data_raw/tabela_recorr_2021_total.rds")
 recor_table_tipo <- readRDS("../data_raw/recor_table_tipo.rds")
 decisoes_tipo_r <- readRDS("../data_raw/decisoes_tipo_r.rds")
+acordaos <- readRDS("../data_raw/acordaos.rds")
 text_total_col <- readRDS("../data_raw/text_total_col.rds")
 tab_rg_final_1 <- readRDS(file = "../data_raw/tab_rg_final_1.rds")
 tab_rg_final_2 <- readRDS(file="../data_raw/tab_rg_final_2.rds")
 tab_rg_final_3 <- readRDS(file = "../data_raw/tab_rg_final_3.rds")
+
 
 # Manipulações - texto ----------------------------------------
 
@@ -126,6 +130,17 @@ text_a3 <- tabela_acervo |>
   filter(ano %in% ano_atual) |> 
   mutate(acervo_rec4 = if_else(num_acervo4 < 0, "uma redução em" , "um aumento de")) |> 
   mutate(paste0(acervo_rec4, " ", abs(num_acervo4), "%"))
+
+
+# Acervo autuação - %
+
+ acervo_autuacao_pct <- acervo_autuacao |>
+   janitor::adorn_percentages("col") |> 
+   mutate(n = round(n*100,1))
+ 
+text_a4 <- acervo_autuacao_pct$n[4]
+ 
+text_a5 <- sum(acervo_autuacao_pct$n[-1]) 
 
 
 # Recebidos  - Selecionando as variáveis desejadas
@@ -370,7 +385,7 @@ tabela_acervo  |>
             position = position_stack(vjust = 1.1))+
   ggtitle("Acervo processual") +
   geom_area(fill = 4, color = 'grey', alpha = 0.5)+
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte) +
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
   #coord_cartesian(ylim = c(0, 60000))+
@@ -400,7 +415,7 @@ acervo_orig_rec |>
              fill= fct_reorder(classificacao, qtd, .desc = TRUE)), position = "identity")+
   ggtitle("Originários e recursais") +
   geom_area(color = 'grey') +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte) +
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
   theme(axis.title.y=element_blank(),
@@ -421,14 +436,13 @@ Historicamente há uma certa estabilidade em relação aos processos originário
 
 autuacao_levels = c('Anterior a 2017', '2017 a 2018', '2019 a 2020', '2021')
 
-acervo_autuacao <- readRDS("../data_raw/acervo_autuacao.rds")
 
 acervo_autuacao |> 
   ggplot2::ggplot(aes(y = clas_ano_autuacao, x = n)) +
   geom_bar(aes(fill = autuacao_levels), color = 'black', stat = "identity",show.legend = FALSE) +
   geom_label(aes(label=n))+
   ggtitle("Acervo por ano de autuação") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte)+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
   theme(axis.title.x=element_blank(),
@@ -437,10 +451,25 @@ acervo_autuacao |>
 
 ```
 
-Mais de <mark>70%</mark> dos processos do acervo têm menos de 1 ano de autuação.
-Aproximadamente <mark>89%</mark> do acervo é composto por feitos autuados nos últimos 5 anos. Estes resultados demonstram o compromisso do STF com a redução do acervo de processos antigos e o alcance da meta do Indicador de Processos Antigos.
+Mais de `r as.character(text_a4)`% dos processos do acervo têm menos de 1 ano de autuação.
+Aproximadamente `r as.character(text_a5)`% do acervo é composto por feitos autuados nos últimos 5 anos. Estes resultados demonstram o compromisso do STF com a redução do acervo de processos antigos e o alcance da meta do Indicador de Processos Antigos.
 
-Com relação ao Ramo do Direito, a categoria Direito Administrativo e Outras Matérias do Direito Público corresponde a `r ramo_direito$percent_ramo[1]` do total, seguida por Direito Processual Penal `r ramo_direito$percent_ramo[2]` e Direito Tributário (`r ramo_direito$percent_ramo[3]`). <mark>Pendente automatizar nomes dos ramos!</mark>
+```{r text_ramo, warning=FALSE, include=FALSE}
+
+text_ramo <- paste0("Com relação ao Ramo do Direito, 
+                    a categoria ", 
+                    str_to_title(ramo_direito[[1,1]]),
+                    ' corresponde a ',
+                    str_to_title(ramo_direito[[1,3]]),
+                    ' do total, seguida por ',
+                    str_to_title(ramo_direito[[2,1]]),
+                    ' (', str_to_title(ramo_direito[[2,3]],),
+                    ')', ' e ', 
+                    str_to_title(ramo_direito[[3,1]]),
+                    ' (', str_to_title(ramo_direito[[3,3]]),').')
+```
+
+`r text_ramo`
 
 ```{r tabela2, echo=FALSE, warning=FALSE}
 
@@ -477,7 +506,7 @@ acervo_eletro_fis |>
   geom_line(aes(y = qtd, shape=tipo, fill = factor(tipo), colour=tipo)) +
   geom_label(aes(label = paste0(round(qtd,3)*100,"%"))) +
   ggtitle("Acervo Físico x Eletrônico") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte)+
   coord_cartesian(ylim = c(-0.2, 1.2))+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
@@ -523,7 +552,7 @@ dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
 ggplot(dados, aes(x = Ano, y = Processos)) +
   geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity", show.legend = FALSE) + 
   ggtitle("Processos Recebidos") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte)+
   geom_label(aes(label = Processos),
              position = position_dodge(0.9), 
              vjust = 0.5, size = 3.5, hjust = 0.5)+
@@ -561,7 +590,7 @@ percent_total |>
   geom_point() + 
   geom_line(aes(y = qtd, shape=destino, fill = factor(destino), colour=destino)) +
   geom_label_repel(aes(label = paste0(round(qtd,3),"%")), vjust = 0.5, hjust = 0.2) +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
+  labs(caption = fonte) +
   coord_cartesian(ylim = c(25, 73))+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
@@ -596,7 +625,7 @@ qtd_total |>
   geom_point() + 
   geom_line(aes(y = qtd, shape=destino, fill = factor(destino), colour=destino)) +
   geom_label_repel(aes(label = qtd), hjust = 0.5, size = 3) +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
+  labs(caption = fonte) +
    scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
     theme(axis.title.y=element_blank(),
@@ -642,7 +671,7 @@ recursal_pres_min |>
   geom_point() + 
   geom_line(aes(y = qtd, shape=destino, fill = factor(destino), colour=destino)) +
   geom_label(aes(label = paste0(round(qtd,3),"%"))) +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
+  labs(caption = fonte) +
  # coord_cartesian(ylim = c(25, 73))+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
@@ -678,7 +707,7 @@ qtd_recur_pres_min |>
   geom_point() + 
   geom_line(aes(y = qtd, shape=destino, fill = factor(destino), colour=destino)) +
   geom_label_repel(aes(label = qtd), vjust = 0.5, size = 3) +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
+  labs(caption = fonte) +
    scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
     theme(axis.title.y=element_blank(),
@@ -715,7 +744,7 @@ recebidos_recursais |>
              fill= fct_reorder(recursais, qtd, .desc = TRUE)), position = "identity")+
   ggtitle("Recebidos - ARE, AI e RE") +
   geom_area(color = 'grey') +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte)+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
   theme(axis.title.y=element_blank(),
@@ -738,7 +767,7 @@ dados <- dados %>%
 
 ggplot(dados, aes(x = Ano, y = Proporção, fill = Processos)) +
   geom_col() +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte)+
   geom_text(aes(label = paste0(Proporção, "%")),
             position = position_stack(vjust = 0.5)) +
   scale_fill_brewer(palette = "Blues") +
@@ -781,7 +810,7 @@ graph_provimento |>
   geom_line(aes(y = qtd, shape=tipo, fill = factor(tipo), colour=tipo), size=0.8) +
   geom_label(aes(label = paste0(round(qtd,2),"%"),vjust = -1)) +
   ggtitle("Taxa de provimento de decisões") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte)+
   coord_cartesian(ylim = c(-2, 110))+
   scale_x_continuous(breaks = 2010:2021) +
   scale_fill_brewer(palette = "Blues") +
@@ -817,7 +846,7 @@ dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
 ggplot(dados, aes(x = Ano, y = Processos)) +
   geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity",show.legend = FALSE) + 
   ggtitle("Processos originários") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte)+
   geom_label(aes(label = Processos),
              position = position_dodge(0.9), 
              vjust = 0.5, size = 3.5, hjust = 0.5)+
@@ -846,7 +875,7 @@ dados <- dados %>%
 
 ggplot(dados, aes(x = Ano, y = Proporção, fill = Processos)) +
   geom_col() +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte)+
   geom_text(aes(label = paste0(Proporção, "%")),
             position = position_stack(vjust = 0.5)) +
   scale_fill_brewer(palette = "Blues") +
@@ -907,7 +936,7 @@ graph_decisoes |>
   ggplot(aes(x = ano, y = qtd, 
              fill= fct_reorder(decisoes, qtd, .desc = TRUE)), position = "identity")+
   geom_area(color = 'grey') +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte)+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
   theme(axis.title.y=element_blank(),
@@ -960,7 +989,7 @@ dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
 ggplot(dados, aes(x = Ano, y = Processos)) +
   geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity", show.legend = FALSE) + 
   ggtitle("Decisões Monocráticas") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte)+
   geom_label(aes(label = Processos),
              position = position_dodge(0.9), 
              vjust = 0.5, size = 3.5, hjust = 0.5)+
@@ -989,7 +1018,7 @@ dados$Ano <- factor(dados$Ano, levels = unique(dados$Ano))
 ggplot(dados, aes(x = Ano, y = Processos)) +
   geom_bar(aes(fill = Ano), binwidth = 1, color = 'black', stat = "identity", show.legend = FALSE) + 
   ggtitle("Decisões Colegiadas") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte)+
   geom_label(aes(label = Processos),
              position = position_dodge(0.9), 
              vjust = 0.5, size = 3.5, hjust = 0.5)+
@@ -1045,11 +1074,22 @@ colnames(tabela_final_plen)[1] <- "Decisões do Plenário por Classe"
 
 Os números constantes da tabela a seguir demonstram a importância da adoção no STF da gestão estratégica focada na implementação de sua transformação digital como instrumento indispensável à entrega de uma prestação jurisdicional mais célere e efetiva para a sociedade.
 
-<center><span class="border-highlight"><b>Tabela 8 - Euler </center> </span></b>
+```{r tabela8, echo=FALSE, warning=FALSE}
+
+colnames(table_org) <- c("Órgão Julgador", "Quantidade de processos")
+
+
+DT::datatable(table_org, extensions = 'Buttons', options = list(
+  dom = 'Bfrtip',
+  buttons = c('copy', 'csv', 'excel', 'pdf', 'print','colvis') ))
+
+
+```
+
 
 São os quantitativos de decisões em sessões virtuais por órgão julgador, em `r ano_atual`^[Informações sobre o quantitativo de sessões virtuais, presenciais e sessões solenes podem ser obtidos no relatório da Assessoria do Plenário.].
 
-Em `r ano_atual`, foram publicados <mark>18.188</mark> acórdãos.
+Em `r ano_atual`, foram publicados `r as.character(acordaos$qtd[[1]])` acórdãos.
 
 
 
@@ -1064,7 +1104,7 @@ tx_recorr |>
   geom_line() +
   geom_label(aes(label = paste0(taxa_rec, "%")))+
   ggtitle("Taxa de recorribilidade") +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.")+
+  labs(caption = fonte)+
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight()+
   coord_cartesian(ylim = c(10, 50))+
@@ -1126,7 +1166,7 @@ receb_baixa |>
   )) +
   geom_line(aes(colour = destino)) +
   geom_label(aes(label = qtd), size=2.5) +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
+  labs(caption = fonte) +
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
   theme(
@@ -1193,7 +1233,7 @@ tab_rg_final_1 |>
   ggplot(aes(x = ano, y = qtd, group = RG, shape = RG)) +
   geom_line(aes(colour=RG), size=1) +
   geom_label(aes(label = qtd), size = 3) +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
+  labs(caption = fonte) +
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
   theme(legend.position="bottom",
@@ -1221,7 +1261,7 @@ tab_rg_final_2 |>
   ggplot(aes(x = ano, y = qtd, group = RG, shape = RG)) +
   geom_line(aes(colour=RG), size=1) +
   geom_label(aes(label = qtd), size = 3) +
-  labs(caption = "Fonte: Portal de Informações Gerenciais em 01/12/2021 e Relatório de Atividades 2021.") +
+  labs(caption = fonte) +
   scale_fill_brewer(palette = "Blues") +
   ggthemes::theme_fivethirtyeight() +
   theme(legend.position="bottom",
@@ -1247,7 +1287,7 @@ Em parceria com o STJ e o CNJ, a Presidência do STF realizou, nas instâncias d
 
 -   consolidar a sistemática da repercussão;
 -   aperfeiçoar o juízo de admissibilidade;
--   orientar sobre o procedimento de afetação de representativos de     controvérsia.
+-   orientar sobre o procedimento de afetação de representativos de controvérsia.
 
 ## Teses firmadas e liberação de processos em todo o País
 

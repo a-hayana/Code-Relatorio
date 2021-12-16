@@ -85,9 +85,24 @@ acervo_autuacao <- acervo2021_sep %>%
   group_by(clas_ano_autuacao) |>
   summarise(n = n())
 
-# saveRDS(acervo_autuacao, file ="data_raw/acervo_autuacao.rds")
+ saveRDS(acervo_autuacao, file ="data_raw/acervo_autuacao.rds")
 
-# Grafico
+
+
+# Texto - Ano de autuação -------------------------------------------------
+
+
+ acervo_autuacao_pct <- acervo_autuacao |>
+   janitor::adorn_percentages("col") |>
+   mutate(n = round(n*100,1))
+
+ sum_acervo_pct <- sum(acervo_autuacao_pct$n[-1])
+
+
+
+# Gráfico - Autuação ------------------------------------------------------
+
+
 acervo_autuacao |>
   ggplot2::ggplot(aes(y = clas_ano_autuacao, x = n)) +
   geom_bar(aes(fill = autuacao_levels), color = 'black', stat = "identity",show.legend = FALSE) +
@@ -123,7 +138,10 @@ ramo_direito <- acervo2021_sep |>
   # knitr::kable()
 
 
-# saveRDS(ramo_direito, file = "data_raw/ramo_direito.rds")
+# text_ramo <- paste0("Com relação ao Ramo do Direito, a categoria ", str_to_title(ramo_direito[[1,1]]), ' corresponde a ', str_to_title(ramo_direito[[1,3]]), ' do total, seguida por ', str_to_title(ramo_direito[[2,1]]), '(', str_to_title(ramo_direito[[2,3]],), ')', ' e ', str_to_title(ramo_direito[[3,1]]), '(', str_to_title(ramo_direito[[3,3]]),').')
+
+
+saveRDS(ramo_direito, file = "data_raw/ramo_direito.rds")
 
 
 # Apenas informar como nota de rodapé.
@@ -138,14 +156,14 @@ faltantes_ramo <- acervo2021_sep |>
 # Tabela 8: Evolução do Acervo - Originários e Recursais ------------------
 # Tabela 11: Acervo Físico x Eletrônico -----------------------------------
 # View(tabela_acervo)
-# saveRDS(tabela_acervo, file = "data_raw/tabela_acervo.rds")
+ saveRDS(tabela_acervo, file = "data_raw/tabela_acervo.rds")
 
 
 # Tabela 9: Acervo por Ano de Autuação
 # View(acervo_autuacao)
-# saveRDS(acervo_autuacao, file = "data_raw/acervo_autuacao.rds")
+ saveRDS(acervo_autuacao, file = "data_raw/acervo_autuacao.rds")
 
 
 # Tabela 10: Acervo por Ramo do Direito -----------------------------------
 # View(ramo_direito)
-# saveRDS(ramo_direito, file = "data_raw/ramo_direito.rds")
+ saveRDS(ramo_direito, file = "data_raw/ramo_direito.rds")

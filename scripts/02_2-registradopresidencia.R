@@ -174,40 +174,40 @@ full_recebidos <- cbind(tabela_rec_pres_total,tabela_rec_min_total[,-1])
 # Total presidencia x dist. ministros
 qtd_total_pres_min <- full_recebidos |>
   select(ano, reg_presid_total,dist_min_total)
-# saveRDS(qtd_total_pres_min, "qtd_total_pres_min.rds")
+ saveRDS(qtd_total_pres_min, "qtd_total_pres_min.rds")
 
 # Total (%) recursal presidencia x dist. ministros
 qtd_recursal_pres_min <- full_recebidos |>
   select(ano, perc_presid_recur,perc_min_recur)
-# saveRDS(qtd_recursal_pres_min, "qtd_recursal_pres_min.rds")
+ saveRDS(qtd_recursal_pres_min, "qtd_recursal_pres_min.rds")
 
 # Total (qtd) recursal presidencia x dist. ministros
 qtd_recursal_pres_min_2 <- full_recebidos |>
   select(ano, reg_presid_recur,dist_min_recursal)
-# saveRDS(qtd_recursal_pres_min_2, "qtd_recursal_pres_min_2.rds")
+ saveRDS(qtd_recursal_pres_min_2, "qtd_recursal_pres_min_2.rds")
 
 # Resumo --------------------------------------------------------
 
 # Tabela 13: Processos Registrados à Presidência e Distribuídos aos Ministros --------
 # View(tabela_perc_total)
-# saveRDS(tabela_perc_total, "tabela_perc_total.rds")
+ saveRDS(tabela_perc_total, "tabela_perc_total.rds")
 
 # Tabela 14: Processos Distribuídos aos Ministros - Quantidade -------------
 # Tabela 15: Percentual de Recursos Distribuídos aos Ministros ------------
 # Tabela 16: Quantidade de Recursos  Distribuídos aos Ministros -----------
 # View(tabela_rec_min_total)
-# saveRDS(tabela_rec_min_total, "tabela_rec_min_total.rds")
+ saveRDS(tabela_rec_min_total, "tabela_rec_min_total.rds")
 
 # Tabela 14: Processos Registrados à Presidência - Quantidade -------------
 # Tabela 15: Percentual de Recursos registrados à Presidência -------------
 # Tabela 16: Quantidade de Recursos registrados à Presidência -------------
 # View(tabela_rec_pres_total)
-# saveRDS(tabela_rec_pres_total, "tabela_rec_pres_total.rds")
+ saveRDS(tabela_rec_pres_total, "tabela_rec_pres_total.rds")
 
 
 # Para gráfico: Quantidade total - Presidência x Ministros ------------------------------
 # View(qtd_total_pres_min)
-# saveRDS(qtd_total_pres_min, "qtd_total_pres_min.rds")
+ saveRDS(qtd_total_pres_min, "qtd_total_pres_min.rds")
 
 
 

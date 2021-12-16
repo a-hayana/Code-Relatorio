@@ -50,7 +50,7 @@ recor_table_tipo <- recorr2021  |>
   mutate(tipo = ifelse(classe %in% c("ARE","RE", "AI"), "recursal", "originario")) |>
   relocate(tipo, .after = classe)
 
-#saveRDS(recor_table_tipo, file = "data_raw/recor_table_tipo.rds")
+saveRDS(recor_table_tipo, file = "data_raw/recor_table_tipo.rds")
 
 rec_total <-  recor_table_tipo  |>
   group_by(tipo) |>
@@ -65,7 +65,7 @@ decisoes_tipo_r <- decisoes2021 |>
   mutate(tipo = ifelse(classe %in% c("ARE","RE", "AI"), "recursal", "originario")) |>
   relocate(tipo, .after = classe)
 
-# saveRDS(decisoes_tipo_r, file = "data_raw/decisoes_tipo_r.rds")
+ saveRDS(decisoes_tipo_r, file = "data_raw/decisoes_tipo_r.rds")
 
 dec_total_r <-  decisoes_tipo_r |>
   group_by(tipo) |>
@@ -80,4 +80,4 @@ perc <- cbind(rec_total$tipo,taxa_recorr)
 
 # Tabela 29: Taxa de Recorribilidade --------------------------------------
 # View(tabela_recorr_2021_total)
-# saveRDS(tabela_recorr_2021_total, file = "data_raw/tabela_recorr_2021_total.rds")
+ saveRDS(tabela_recorr_2021_total, file = "data_raw/tabela_recorr_2021_total.rds")

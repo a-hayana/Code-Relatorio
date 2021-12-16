@@ -120,7 +120,7 @@ tabela_text_total <- cbind(tabela_perc_total,
                            "dist_min_total" = tabela_rec_min_total$dist_min_total,
                            "reg_presid_total" =tabela_rec_pres_total$reg_presid_total)
 
-# saveRDS(tabela_text_total, file = "data_raw/tabela_text_total.rds")
+ saveRDS(tabela_text_total, file = "data_raw/tabela_text_total.rds")
 
 
 
@@ -128,18 +128,18 @@ tabela_text_total <- cbind(tabela_perc_total,
 
 # Tabela 13: Processos Registrados à Presidência e Distribuídos aos Ministros --------
 # View(tabela_perc_total)
-#saveRDS(tabela_perc_total, file = "data_raw/tabela_perc_total.rds")
+saveRDS(tabela_perc_total, file = "data_raw/tabela_perc_total.rds")
 
 # Tabela 14: Processos Distribuídos aos Ministros - Quantidade -------------
 # Tabela 15: Percentual de Recursos Distribuídos aos Ministros ------------
 # Tabela 16: Quantidade de Recursos  Distribuídos aos Ministros -----------
 # View(tabela_rec_min_total)
-#saveRDS(tabela_rec_min_total, file = "data_raw/tabela_rec_min_total.rds")
+saveRDS(tabela_rec_min_total, file = "data_raw/tabela_rec_min_total.rds")
 
 # Tabela 14: Processos Registrados à Presidência - Quantidade -------------
 # Tabela 15: Percentual de Recursos registrados à Presidência -------------
 # Tabela 16: Quantidade de Recursos registrados à Presidência -------------
 # View(tabela_rec_pres_total)
-#saveRDS(tabela_rec_pres_total, file = "data_raw/tabela_rec_pres_total.rds")
+saveRDS(tabela_rec_pres_total, file = "data_raw/tabela_rec_pres_total.rds")
 
 

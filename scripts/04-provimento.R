@@ -13,7 +13,7 @@ prov_geral <- provimento |>
          re_prov = round(re_prov,3)*100,
          tx_nao_prov = round(tx_nao_prov,3)*100)
 
-# saveRDS(prov_geral, file = "data_raw/prov_geral.rds")
+ saveRDS(prov_geral, file = "data_raw/prov_geral.rds")
 
 
-# Falta o gráfico! (EULER)
+

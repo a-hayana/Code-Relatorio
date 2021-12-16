@@ -27,5 +27,3 @@ temas_julg_hist <- produtiv_hist |>
 # Produtividade: RECEBIDOS/BAIXA -> Ver aba "02_1-recebidos"
 
 
-# PENDENTE AQUI! (EULER)
-# Falta: RG RECONHECIDA / RG NEGADA / MERITO JULGADO / REAF. JURIS

@@ -19,6 +19,18 @@ desc_especies <- read_excel("dados/relatorio_historico.xlsx",
 
 
 
+# Informação - Acórdãos
+# >> NOTA: O nome do relatório NÃO pode ter acentos;
+# >> NOTA: O nome da aba "Acordão" não pode ter acentos;
+# Corrigir manualmente (no excel) antes de rodar as próximas linhas
+acordaos <- read_excel("dados/Relatorio de Atividades.xlsx",
+                       sheet = "Acordao")
+colnames(acordaos) <- c("Acordãos publicados", "qtd")
+
+
+saveRDS(acordaos, file = "data_raw/acordaos.rds")
+
+
 # Leitura e limpeza dos dados 2021 - Decisões -----------------------------
 
 # Organizando dados 2021
@@ -37,7 +49,7 @@ decisoes2021 |>
 decisoes2021  <-  decisoes2021 |>
   filter(!is.na(tipo_decisao))
 
-# saveRDS(decisoes2021, file = "data_raw/decisoes2021.rds")
+ saveRDS(decisoes2021, file = "data_raw/decisoes2021.rds")
 
 # Organização da tabela histórica - Decisões por Espécie --------------------------------------
 
@@ -258,7 +270,7 @@ text_total_col <-  dec_org_julg2 |>
                                    if_else(orgao_julgador2 %in% c("Plenário","Plenário Virtual - RG"), "Plenário", orgao_julgador2))) |>
   relocate(orgao_julgador3, .after = orgao_julgador2)
 
-# saveRDS(text_total_col, file = "data_raw/text_total_col.rds")
+ saveRDS(text_total_col, file = "data_raw/text_total_col.rds")
 
 # Total - Por órgão - Colegiado
 text_orgao3 <- text_total_col |>
@@ -270,19 +282,77 @@ text_orgao3 <- text_total_col |>
 
 
 
+# Decisões em sessões virtuais --------------------------------------------
+
+# Decisões Virtuais
+
+
+decisoes2021 |>
+  filter(tipo_decisao == 'COLEGIADA') |>
+  group_by(orgao_julgador) |>
+  summarise(n = sum(qtd_ocorrencias_processuais))
+
+
+decisoes2021 <-
+  decisoes2021 |>
+  mutate(
+    indicador_virtual = stringr::str_detect(observacao_andamento, pattern = "[Ss]ess[ãa]o [Vv]irtual"),
+    orgao_julgador4 = case_when(
+      orgao_julgador == '1ª TURMA' & indicador_virtual == TRUE ~ '1ª TURMA - SESSÃO VIRTUAL',
+      orgao_julgador == '2ª TURMA' & indicador_virtual == TRUE ~ '2ª TURMA - SESSÃO VIRTUAL',
+      orgao_julgador == 'TRIBUNAL PLENO' & indicador_virtual == TRUE ~ 'TRIBUNAL PLENO - SESSÃO VIRTUAL',
+      TRUE ~ orgao_julgador
+    ),
+    indicador_virtual_final = stringr::str_detect(orgao_julgador4, pattern = 'VIRTUAL'),
+    indicador_virtual_final = if_else(indicador_virtual_final, 'VIRTUAL', 'PRESENCIAL')
+  )
+
+# Verificação
+decisoes2021 |>
+  filter(tipo_decisao == 'COLEGIADA') |>
+  group_by(indicador_virtual, indicador_virtual_final) |>
+  summarise(n = sum(qtd_ocorrencias_processuais))
+
+decisoes2021 |>
+  filter(tipo_decisao == 'COLEGIADA') |>
+  group_by(orgao_julgador, orgao_julgador4) |>
+  summarise(n = sum(qtd_ocorrencias_processuais))
+
+
+# Estatística por orgao julgador
+
+table_org <- decisoes2021 |>
+  filter(tipo_decisao == 'COLEGIADA') |>
+  group_by(orgao_julgador4) |>
+  summarise(n = sum(qtd_ocorrencias_processuais))
+
+saveRDS(table_org, file = "data_raw/table_org.rds")
+
+
+# Estatistica de virtual e presencial
+
+# decisoes2021 |>
+#   filter(tipo_decisao == 'COLEGIADA') |>
+#   group_by(indicador_virtual_final) |>
+#   summarise(n = sum(qtd_ocorrencias_processuais))
+#
+#
+
+
+
 
 # Resumo ------------------------------------------------------------------
 
 # Tabela 23: Quantitativo de Decisões por Espécie -------------------------
 # View(tabela_dec_especies_2021)
-# saveRDS(tabela_dec_especies_2021, file = "data_raw/tabela_dec_especies_2021.rds")
+#saveRDS(tabela_dec_especies_2021, file = "data_raw/tabela_dec_especies_2021.rds")
 
 
 # Tabela 22: Decisões - Finais e Total ------------------------------------
 # Tabela 24: Quantitativo de Decisões Monocráticas ------------------------
 # Tabela 25: Quantitativo de Decisões Colegiadas --------------------------
 # View(tabela_dec)
-# saveRDS(tabela_dec, file = "data_raw/tabela_dec.rds")
+#saveRDS(tabela_dec, file = "data_raw/tabela_dec.rds")
 
 # Tabela 26: Quantitativo de Decisões por Orgão Julgador ------------------
 # View(tabela_final_orgao)
