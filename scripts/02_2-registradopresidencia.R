@@ -20,12 +20,12 @@ distribuidos2021  <-  distribuidos2021 |>
 
 # Total (dist. ministros + reg. à presidência)
 distribuidos2021 |>
-  select(subgrupo_andamento_comissao) |>
-  summarise(n = n())  # Total = 76403
+  select(subgrupo_andamento_comissao,qtd_ocorrencias) |>
+  summarise(n = sum(qtd_ocorrencias))
 
 # Separando variáveis desejadas
 distribuidos2021_sep <- distribuidos2021 |>
-  select(classe:meio_processo, subgrupo_andamento_comissao) |>
+  select(classe:meio_processo, subgrupo_andamento_comissao,qtd_ocorrencias) |>
   group_by(classe) |>
   mutate(tipo = ifelse(classe %in% c("ARE","RE", "AI"), "recursal", "originario"))
 
@@ -33,14 +33,14 @@ distribuidos2021_sep <- distribuidos2021 |>
 reg_presid <- distribuidos2021_sep |>
   group_by(subgrupo_andamento_comissao) |>
   filter(subgrupo_andamento_comissao == "Registro à Presidência") |>
-  summarise(n = n()) # Registro à Presidência = 44865
+  summarise(n = sum(qtd_ocorrencias))
 
 # Registros à Presidência - Recursal
 reg_presid_recursal <- distribuidos2021_sep |>
   group_by(subgrupo_andamento_comissao) |>
   filter(subgrupo_andamento_comissao == "Registro à Presidência") |>
   filter(tipo == "recursal") |>
-  summarise(n = n()) # Registro à Presidência = 44048
+  summarise(n = sum(qtd_ocorrencias))
 
 
 # Registros à Presidência - Originário
@@ -48,7 +48,7 @@ reg_presid_originario <- distribuidos2021_sep |>
   group_by(subgrupo_andamento_comissao) |>
   filter(subgrupo_andamento_comissao == "Registro à Presidência") |>
   filter(tipo == "originario") |>
-  summarise(n = n()) # Registro à Presidência = 817
+  summarise(n = sum(qtd_ocorrencias))
 
 
 # Processos Distribuídos aos Ministros ------------------------------------
@@ -56,7 +56,7 @@ reg_presid_originario <- distribuidos2021_sep |>
 
 # Separando recursal/originário e presidente/ministros
 sep_subgrupo <- distribuidos2021 |>
-  select(classe:meio_processo, subgrupo_andamento_comissao) |>
+  select(classe:meio_processo, subgrupo_andamento_comissao, qtd_ocorrencias) |>
   group_by(subgrupo_andamento_comissao) |>
   mutate(tipo = ifelse(classe %in% c("ARE","RE", "AI"), "recursal", "originario")) |>
   mutate(destino = ifelse(subgrupo_andamento_comissao %in% "Registro à Presidência", "Registro à Presidência", subgrupo_andamento_comissao),
@@ -67,14 +67,14 @@ sep_subgrupo <- distribuidos2021 |>
 dist_min_total <- sep_subgrupo |>
   group_by(destino) |>
   filter(destino == "Distribuído aos Ministros") |>
-  summarise(n = n())
+  summarise(n = sum(qtd_ocorrencias))
 
-# Distribuídos aos Ministros - Recursal
+# Distribuídos aos Ministros - Recursal <<<
 dist_min_recursal <- sep_subgrupo |>
   group_by(destino) |>
   filter(destino == "Distribuído aos Ministros") |>
   filter(tipo == "recursal") |>
-  summarise(n = n())
+  summarise(n = sum(qtd_ocorrencias))
 
 
 # Registros aos Ministros - Originário
@@ -82,7 +82,7 @@ dist_min_orig <- sep_subgrupo |>
   group_by(destino) |>
   filter(destino == "Distribuído aos Ministros") |>
   filter(tipo == "originario") |>
-  summarise(n = n())
+  summarise(n = sum(qtd_ocorrencias))
 
 
 # Percentagem - Recursal (Presidente + Ministros)
@@ -135,8 +135,8 @@ hist_min <- dados_historico |>
   mutate(perc_min_recur = round(perc_min_recur,2)*100)
 
 # Construindo tabela 2021
-min_orig <- dist_min_recursal$n
-min_recur <- dist_min_orig$n
+min_orig <- dist_min_orig$n
+min_recur <- dist_min_recursal$n
 total_rec_min <- min_orig+min_recur
 ano <- 2021
 

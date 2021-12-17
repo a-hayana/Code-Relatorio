@@ -3,7 +3,7 @@
 
 # Separando recursal/originário e presidente/ministros
 sep_subgrupo <- distribuidos2021 |>
-  select(classe:meio_processo, subgrupo_andamento_comissao) |>
+  select(classe:meio_processo, subgrupo_andamento_comissao, qtd_ocorrencias) |>
   group_by(subgrupo_andamento_comissao) |>
   mutate(tipo = ifelse(classe %in% c("ARE","RE", "AI"), "recursal", "originario")) |>
   mutate(destino = ifelse(subgrupo_andamento_comissao %in% "Registro à Presidência", "Registro à Presidência", subgrupo_andamento_comissao),
@@ -14,14 +14,14 @@ sep_subgrupo <- distribuidos2021 |>
 dist_min_total <- sep_subgrupo |>
   group_by(destino) |>
   filter(destino == "Distribuído aos Ministros") |>
-  summarise(n = n())
+  summarise(n = sum(qtd_ocorrencias))
 
 # Distribuídos aos Ministros - Recursal
 dist_min_recursal <- sep_subgrupo |>
   group_by(destino) |>
   filter(destino == "Distribuído aos Ministros") |>
   filter(tipo == "recursal") |>
-  summarise(n = n())
+  summarise(n = sum(qtd_ocorrencias))
 
 
 # Registros aos Ministros - Originário
@@ -29,7 +29,7 @@ dist_min_orig <- sep_subgrupo |>
   group_by(destino) |>
   filter(destino == "Distribuído aos Ministros") |>
   filter(tipo == "originario") |>
-  summarise(n = n())
+  summarise(n = sum(qtd_ocorrencias))
 
 
 # Percentagem - Recursal (Presidente + Ministros)

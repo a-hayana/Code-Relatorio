@@ -57,6 +57,7 @@ tabela_rec_total <- readRDS("../data_raw/tabela_rec_total.rds")
 decisoes2021 <- readRDS("../data_raw/decisoes2021.rds")
 table_org <- readRDS("../data_raw/table_org.rds")
 tabela_perc_total <- readRDS("../data_raw/tabela_perc_total.rds")
+full_especies <- readRDS("../data_raw/full_especies.rds")
 tabela_text_total <- readRDS("../data_raw/tabela_text_total.rds")
 tabela_dec <- readRDS("../data_raw/tabela_dec.rds")
 tabela_rec_baixa_total<- readRDS("../data_raw/tabela_rec_baixa_total.rds")
@@ -950,8 +951,16 @@ graph_decisoes |>
 ```
 
 
+```{r warning=FALSE, include=FALSE}
+# Texto para nota -> Colocando a qtd de "decisão" que mesclou ao "decisão interlocutória"
 
-Além da decisão final, há outras espécies em menor quantidade, conforme apresentado na tabela seguinte com os respectivos quantitativos.
+text_nota <- full_especies |> 
+  filter(subgrupo_andamento_comissao %in% "Decisão")
+
+```
+
+
+Além da decisão final, há outras espécies em menor quantidade, conforme apresentado na tabela seguinte com os respectivos quantitativos.^[Algumas *"Decisões"* receberam somente a classificação geral de "*Decisão*" (`r as.character(text_nota[[2]])`) e foram classificadas como *"Decisão Interlocutória"* para este relatório.]
 
 
 ```{r decisoes_especie, echo=FALSE, warning=FALSE}

@@ -12,7 +12,10 @@ dados_historico <- read_excel("dados/relatorio_historico.xlsx")
 
 
 # --------- Leitura dos dados de 2021
-acervo2021 <- read_excel("dados/dados2021.xlsx")
+acervo2021 <- read_excel("dados/dados2021.xlsx",
+                         sheet = "Acervo")
+
+
 
 
 # Limpeza das variáveis

@@ -67,6 +67,9 @@ full_especies <- decisoes2021 |>
   group_by(subgrupo_andamento_comissao) |>
   summarise(n = sum(qtd_ocorrencias_processuais))
 
+ saveRDS(full_especies, file = "data_raw/full_especies.rds")
+
+
 # Criação de subgrupo2 para mesclar "Decisão" em "Decisão Interlocutória"
 dec_espec_sub2 <- decisoes2021 |>
   group_by(subgrupo_andamento_comissao) |>
@@ -102,7 +105,7 @@ dec_final <- dec_espec_sub2 |>
   filter(subgrupo2 == "Decisão Final") |>
   group_by(subgrupo2) |>
   summarise(n = sum(qtd_ocorrencias_processuais))
-# Total = 66510
+
 
 
 # Tabela 22: Decisões - Total ---------------------------------------------
@@ -112,7 +115,7 @@ dec_mon_col <- decisoes2021 |>
   filter(tipo_decisao %in% c("MONOCRÁTICA", "COLEGIADA")) |>
   group_by(tipo_decisao) |>
   summarise(n = sum(qtd_ocorrencias_processuais))
-# Total = 86397
+
 
 # >>>>>>> Nota "NÃO INFORMADO" definido como "MONOCRÁTICA"
 
@@ -206,13 +209,12 @@ tab_pleno_hist <- dec_plen_class |>
 # Organizando dados do plenário por classe - 2021
 tab_plen_class <- dec_org_julg2 |>
   group_by(orgao_julgador2, classe) |>
-  filter(orgao_julgador2 %in% c("Plenário","Plenário Virtual - RG")) |>
+  filter(orgao_julgador2 %in% "Plenário") |>
   mutate(plen_classe = if_else(classe %in% c("ADC","ADI","ADO","ADPF"), "Controle Concentrado",
                                if_else(classe %in% c("AP","EP","Ext","HC","Inq","PPE","RC","RHC","RvC"), "Classes Criminais",
                                        if_else(classe %in% c("ARE","RE", "AI"), "Classes Recursais", "Demais Classes Originárias")))) |>
   relocate(plen_classe, .after = classe) |>
   relocate(orgao_julgador2, .after = plen_classe)
-
 
 
 # Total - Decisões do plenário por classe - 2021
@@ -356,7 +358,7 @@ saveRDS(tabela_dec, file = "data_raw/tabela_dec.rds")
 
 # Tabela 26: Quantitativo de Decisões por Orgão Julgador ------------------
 # View(tabela_final_orgao)
-# saveRDS(tabela_final_orgao, file = "data_raw/tabela_final_orgao.rds")
+ saveRDS(tabela_final_orgao, file = "data_raw/tabela_final_orgao.rds")
 
 
 # Tabela 28: Quantitativo de Decisões do Plenário por Classe --------------
