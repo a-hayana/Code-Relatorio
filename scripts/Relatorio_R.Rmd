@@ -46,8 +46,8 @@ library(janitor)
 # Inserir periodo da análise
 ano_atual <- 2021
 ano_anterior <- ano_atual-1
-data_tramitacao <- "16/12/2021"
-fonte <- "Fonte: Portal de Informações Gerenciais em 16/12/2021 e Relatório de Atividades 2021."
+data_tramitacao <- "17/12/2021"
+fonte <- "Fonte: Portal de Informações Gerenciais em 17/12/2021 e Relatório de Atividades 2021."
 
 # Leitura RDS -------------------------------------------------
 
@@ -1304,12 +1304,14 @@ sobrestados <- readxl::read_excel(path = file) |>
 table_final <- tab_rg_final_3 |>
   left_join(sobrestados, by = c("link_leading_case" = "tema")) |>
   select(-num_tema) |>
-  mutate(data_andamento = lubridate::as_date(data_andamento, origin = "1899-12-30")) |>
+  mutate(data_andamento = format(as.Date(data_andamento, format = "%Y-%m-%d"),"%d/%m/%Y")) |>
   arrange(desc(qtd_processos)) |>
-  rename(tema = link_leading_case,
-         data = data_andamento,
-         relator = relator_atual,
-         processo = link_processo) |>
+  rename(
+    tema = link_leading_case,
+    data = data_andamento,
+    relator = relator_atual,
+    processo = link_processo
+  ) |>
   janitor::adorn_totals('row')
 
 

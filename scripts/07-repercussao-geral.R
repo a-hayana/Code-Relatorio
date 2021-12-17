@@ -3,10 +3,11 @@ library(tidyverse)
 library(ggplot2)
 
 
+link = "dados/repercussao_geral_2021.xlsx"
 tab_rg <- readxl::read_excel("dados/repercussao_geral_2021.xlsx",
-                   col_types = c("numeric", "text", "text", "skip", "skip", "text",
-                                 "skip", "skip", "skip", "skip", "skip", "skip", "skip",
-                                 "text", "text", "skip", "skip", "numeric", "numeric"), skip = 22)
+                             skip = 1,
+                             sheet = 'Microdados') |>
+                              janitor::clean_names()
 
 
 #View(tab_rg)
@@ -35,7 +36,7 @@ tab_rg_tabela <- tab_rg_view
 
 # Salvei a tabela de DE-PARA
 
-saveRDS(tb_de_para, file="data_raw/tabela_de_para_rg.rds")
+# saveRDS(tb_de_para, file="data_raw/tabela_de_para_rg.rds")
 
 tb_de_para <- readRDS(file="data_raw/tabela_de_para_rg.rds")
 
@@ -193,6 +194,7 @@ saveRDS(tab_rg_final, file="data_raw/tab_rg_final_3.rds")
 # Sobrestados
 # https://paineis.cnj.jus.br/QvAJAXZfc/opendoc.htm?document=qvw_l%2FPainelCNJ.qvw&host=QVS%40neodimio03&anonymous=true&sheet=STF
 
+
 file = "dados/sobrestados.xlsx"
 sobrestados <- readxl::read_excel(path = file) |>
   janitor::clean_names() |>
@@ -203,7 +205,7 @@ sobrestados <- readxl::read_excel(path = file) |>
 table_final <- tab_rg_final |>
   left_join(sobrestados, by = c("link_leading_case" = "tema")) |>
   select(-num_tema) |>
-  mutate(data_andamento = lubridate::as_date(data_andamento, origin = "1899-12-30")) |>
+  mutate(data_andamento = format(as.Date(data_andamento, format = "%Y-%m-%d"),"%d/%m/%Y")) |>
   arrange(desc(qtd_processos)) |>
   rename(
     tema = link_leading_case,
@@ -212,6 +214,7 @@ table_final <- tab_rg_final |>
     processo = link_processo
   ) |>
   janitor::adorn_totals('row')
+
 
 
 DT::datatable(table_final, extensions = 'Buttons', options = list(
