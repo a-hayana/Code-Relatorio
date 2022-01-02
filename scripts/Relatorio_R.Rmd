@@ -46,8 +46,8 @@ library(janitor)
 # Inserir periodo da análise
 ano_atual <- 2021
 ano_anterior <- ano_atual-1
-data_tramitacao <- "17/12/2021"
-fonte <- "Fonte: Portal de Informações Gerenciais em 17/12/2021 e Relatório de Atividades 2021."
+data_tramitacao <- "01/01/2022"
+fonte <- "Fonte: Portal de Informações Gerenciais em 01/01/2022 e Relatório de Atividades 2021."
 
 # Leitura RDS -------------------------------------------------
 
@@ -129,7 +129,7 @@ text_a2_2 <- num_acervo2 |>
 text_a3 <- tabela_acervo |> 
   select(ano,recursal) |> 
   filter(ano %in% ano_atual) |> 
-  mutate(acervo_rec4 = if_else(num_acervo4 < 0, "uma redução em" , "um aumento de")) |> 
+  mutate(acervo_rec4 = if_else(num_acervo4 < 0, "uma redução de magnitude de" , "um aumento de de magnitude de")) |> 
   mutate(paste0(acervo_rec4, " ", abs(num_acervo4), "%"))
 
 
@@ -430,7 +430,7 @@ acervo_orig_rec |>
 ```
 
 
-Historicamente há uma certa estabilidade em relação aos processos originários. Para os recursais, no entanto, há uma expressiva redução no acervo de magnitude de `r text_a3[4]` em relação a 2016, e de `r abs(num_acervo3)`% com relação a `r ano_anterior`.
+Historicamente há uma certa estabilidade em relação aos processos originários. Para os recursais, no entanto, há `r text_a3[4]` em relação a 2016 e de `r abs(num_acervo3)`% com relação a `r ano_anterior`.
 
 ```{r grafico3, echo=FALSE, warning=FALSE}
 # OK - 2021
@@ -1222,8 +1222,8 @@ Objetivos:
 Finalidades:
 
 -   Reforçar a competência do STF para apreciar as questões constitucionais que:
-    -- tenham relevância social, política, econômica ou jurídica;<br> --
-    transcendam os interesses subjetivos da causa;
+    - tenham relevância social, política, econômica ou jurídica;<br> 
+    - transcendam os interesses subjetivos da causa;
 
 -   Uniformizar a interpretação constitucional, de modo a desonerar o STF de decidir múltiplos casos sobre a mesma matéria.
 
@@ -1294,9 +1294,9 @@ Ressalta-se que o NURG assessora a Presidência na análise dos recursos para ap
 
 Em parceria com o STJ e o CNJ, a Presidência do STF realizou, nas instâncias de origem, cursos de capacitação sobre o juízo de admissibilidade do recurso extraordinário e o rito da repercussão geral, com o objetivo de:
 
--   consolidar a sistemática da repercussão;
--   aperfeiçoar o juízo de admissibilidade;
--   orientar sobre o procedimento de afetação de representativos de controvérsia.
+-   Consolidar a sistemática da repercussão;
+-   Aperfeiçoar o juízo de admissibilidade;
+-   Orientar sobre o procedimento de afetação de representativos de controvérsia.
 
 ## Teses firmadas e liberação de processos em todo o País
 
