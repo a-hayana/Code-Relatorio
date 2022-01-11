@@ -470,7 +470,7 @@ text_ramo <- paste0("Com relação ao Ramo do Direito,
                     ' (', str_to_title(ramo_direito[[3,3]]),').')
 ```
 
-`r text_ramo`
+`r text_ramo`^[Há 12 processos sem cadastro de ramo do direito, por isso o total contabiliza 12 processos a menos.]
 
 ```{r tabela2, echo=FALSE, warning=FALSE}
 

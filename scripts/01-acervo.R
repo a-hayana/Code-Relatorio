@@ -59,6 +59,12 @@ tabela_acervo <- rbind(dados_historico,tab1)
 
 
 
+
+
+# -- ----------------------------------------------------------------------
+
+
+
 # Acervo por ano de autuação ----------------------------------------------
 
 # Separando variáveis desejadas
@@ -152,6 +158,16 @@ faltantes_ramo <- acervo2021_sep |>
   filter(is.na(ramo_direito_novo) | ramo_direito_novo == "NULL") |>
   nrow()
 
+
+# Verificar ---------------------------------------------------------------
+
+# Apenas informar como nota de rodapé.
+acervo2021_sep |>
+  filter(is.na(ramo_direito_novo)) |>
+  nrow()
+# NA = 12
+# Há 12 processos sem cadastro de ramo do direito,
+# por isso, o total contabiliza 12 processos a menos.
 
 
 # Resumo ------------------------------------------------------------------
